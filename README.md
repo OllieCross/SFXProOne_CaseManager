@@ -10,6 +10,10 @@
 ![Authentik](https://img.shields.io/badge/Authentik-FD4B2D?style=for-the-badge&logo=authentik&logoColor=white)
 ![Traefik](https://img.shields.io/badge/Traefik-24A1C1?style=for-the-badge&logo=traefik-proxy&logoColor=white)
 
+<div align="center">
+  <img src="logo.jpg" alt="SFXProOne Logo" width="500" />
+</div>
+
 ## 📌 Project Overview
 
 **SFXProOne Case Manager** is a comprehensive, full-stack case management application built to orchestrate, track, and manage complex cases, attachments, and digital assets. It features a modern, responsive user interface utilizing the latest Next.js App Router, backed by up-to-date deployment infrastructure including Docker, Traefik, Authentik, MinIO, Redis, and a Prisma ORM integrated database.
@@ -43,8 +47,8 @@
 - `/src/hooks`: Custom React hooks for uploading files and checking permissions.
 - `/prisma`: Database schema and database seeding scripts.
 - `/infrastructure`: Essential external services container arrangements.
-  - `/authentik`: SSO/Identity Management platform.
-  - `/traefik`: Edge router and ACME (Let's Encrypt) configuration.
+- `/authentik`: SSO/Identity Management platform.
+- `/traefik`: Edge router and ACME (Let's Encrypt) configuration.
 
 ## 🚀 Getting Started
 
@@ -57,19 +61,19 @@
 ### Installation & Local Setup
 
 1. **Clone the repository:**
-   \`\`\`bash
+   ```bash
    git clone <repository-url>
    cd SFXProOne_CaseManager
-   \`\`\`
+   ```
 
 2. **Install Node dependencies:**
-   \`\`\`bash
+   ```bash
    npm install
    # or yarn / pnpm install
-   \`\`\`
+   ```
 
 3. **Set up environment variables:**
-   Create a \`.env\` file in the root directory (use a \`.env.example\` if provided) and populate it with your specific secrets:
+   Create a `.env` file in the root directory (use a `.env.example` if provided) and populate it with your specific secrets:
    - Database connection string (PostgreSQL/MySQL)
    - NextAuth Secrets and URLs
    - MinIO credentials and bucket names
@@ -77,21 +81,21 @@
 
 4. **Spin up Infrastructure (Docker):**
    Start the supporting databases, Redis, MinIO, Authentik, and Traefik instances:
-   \`\`\`bash
+   ```bash
    docker-compose up -d
-   \`\`\`
+   ```
    *(You may also need to start specific infrastructure stacks manually inside `/infrastructure` if they aren't bundled in the main `docker-compose.yml`)*
 
 5. **Run Prisma Migrations:**
-   \`\`\`bash
+   ```bash
    npx prisma migrate dev
    npx prisma db seed # If seed data is required
-   \`\`\`
+   ```
 
 6. **Start the Development Server:**
-   \`\`\`bash
+   ```bash
    npm run dev
-   \`\`\`
+   ```
 
 The application should now be running cleanly on [http://localhost:3000](http://localhost:3000).
 
