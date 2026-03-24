@@ -1,0 +1,70 @@
+# ----------------------------------------------------------------------
+# Node.js & Dependencies
+# ----------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ----------------------------------------------------------------------
+# Next.js & Build output
+# ----------------------------------------------------------------------
+.next/
+out/
+build/
+dist/
+
+# ----------------------------------------------------------------------
+# Environment Variables
+# ----------------------------------------------------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# (Keep .env.example or .env.template if you create one for safe sharing)
+
+# ----------------------------------------------------------------------
+# Prisma
+# ----------------------------------------------------------------------
+# Ignore SQLite databases if you ever use them locally for testing
+*.db
+*.db-journal
+
+# ----------------------------------------------------------------------
+# Logs & Coverage
+# ----------------------------------------------------------------------
+logs
+*.log
+coverage/
+.nyc_output/
+
+# ----------------------------------------------------------------------
+# Editor and OS Specific
+# ----------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ----------------------------------------------------------------------
+# Sensitive Documentation
+# ----------------------------------------------------------------------
+networking.md
