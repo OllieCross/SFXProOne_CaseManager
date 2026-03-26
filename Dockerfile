@@ -33,6 +33,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Prisma schema for running migrations
 COPY --from=builder /app/prisma ./prisma
 
+# Changelog is read at runtime by the /changelog page
+COPY --from=builder /app/CHANGELOG.md ./CHANGELOG.md
+
 # Entrypoint runs migrations then starts the server
 COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh

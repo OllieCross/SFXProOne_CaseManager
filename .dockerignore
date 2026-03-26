@@ -2,7 +2,10 @@ node_modules
 .next
 .git
 .gitignore
-*.md
+README.md
+file-structure.md
+build-phases.md
+claude-code.md
 .env
 .env.local
 .env.development
