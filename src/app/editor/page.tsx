@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import DeleteCaseButton from '@/components/editor/DeleteCaseButton'
+import QRGenerator from '@/components/editor/QRGenerator'
 
 export default async function EditorPage() {
   const session = await auth()
@@ -26,9 +27,12 @@ export default async function EditorPage() {
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">Cases</h1>
-          <Link href="/editor/new" className="btn-primary text-sm">
-            + New Case
-          </Link>
+          <div className="flex items-center gap-2">
+            <QRGenerator />
+            <Link href="/editor/new" className="btn-primary text-sm">
+              + New Case
+            </Link>
+          </div>
         </div>
 
         {cases.length === 0 && (

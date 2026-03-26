@@ -119,6 +119,7 @@ This project relies on **Authentik** via NextAuth. Ensure that your Authentik in
 - [x] Release Notes page
 - [x] No Case found Page
 - [x] Footer with credits, github, linkedin, instagram, copyrights
+- [ ] QR code generator
 - [ ] Dockerfile optimizations
 - [ ] admin user management
 - [ ] Migrate Authentik and Traefik to separate folders outside project codebase
