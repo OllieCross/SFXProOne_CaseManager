@@ -1,10 +1,24 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { s3, BUCKET, ensureBucket } from '@/lib/minio'
+import { S3Client } from '@aws-sdk/client-s3'
+import { BUCKET, ensureBucket } from '@/lib/minio'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rateLimit'
+
+// Separate S3 client that signs URLs using the public-facing MinIO URL.
+// The browser PUTs directly to this URL, so the Host header must match
+// what the signature was computed for.
+const s3Public = new S3Client({
+  endpoint: process.env.MINIO_PUBLIC_URL,
+  region: 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.MINIO_ROOT_USER!,
+    secretAccessKey: process.env.MINIO_ROOT_PASSWORD!,
+  },
+  forcePathStyle: true,
+})
 
 const schema = z.object({
   caseId: z.string().min(1),
@@ -56,16 +70,7 @@ export async function POST(req: Request) {
     ContentLength: maxBytes,
   })
 
-  const internalUrl = await getSignedUrl(s3, command, { expiresIn: 300 })
-
-  // Rewrite the internal Docker hostname (e.g. http://minio:9000) to the
-  // public-facing HTTPS URL so the browser can PUT directly without hitting
-  // a mixed-content block.
-  const publicBase = new URL(process.env.MINIO_PUBLIC_URL!)
-  const rewritten = new URL(internalUrl)
-  rewritten.protocol = publicBase.protocol
-  rewritten.host = publicBase.host
-  const url = rewritten.toString()
+  const url = await getSignedUrl(s3Public, command, { expiresIn: 300 })
 
   return NextResponse.json({ url, fileKey })
 }
