@@ -42,8 +42,6 @@ const schema = z.object({
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 const ALLOWED_DOC_TYPES = ['application/pdf']
-const MAX_IMAGE_BYTES = 20 * 1024 * 1024 // 20 MB
-const MAX_DOC_BYTES = 50 * 1024 * 1024 // 50 MB
 
 export async function POST(req: Request) {
   const session = await auth()
@@ -74,13 +72,11 @@ export async function POST(req: Request) {
 
   const ext = fileName.split('.').pop() ?? ''
   const fileKey = `${type}s/${caseId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const maxBytes = type === 'image' ? MAX_IMAGE_BYTES : MAX_DOC_BYTES
 
   const command = new PutObjectCommand({
     Bucket: BUCKET,
     Key: fileKey,
     ContentType: mimeType,
-    ContentLength: maxBytes,
   })
 
   const url = await getSignedUrl(getS3Public(), command, { expiresIn: 300 })
