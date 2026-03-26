@@ -111,8 +111,14 @@ This project relies on **Authentik** via NextAuth. Ensure that your Authentik in
 
 ## ✅ To-Do List
 
-- [ ] Light/Dark mode switch based on OS settings
+- [ ] favicon.ico implementation
 - [ ] Release Notes page
+- [ ] No Case found Page
+- [ ] Dockerfile optimizations
+- [ ] Migrate Authentik and Traefik to separate folders outside project codebase
+- [ ] Light/Dark mode switch based on OS settings
 - [ ] Footer with credits, github, linkedin, instagram, copyrights
-- [ ] editor/ edit the assigned qr code
-- [ ] scan/ List all available cases
+- [ ] /edit - option to edit the assigned qr code to case
+- [ ] /scan - option to ist all available cases
+- [ ] Events organisation system
+- [ ] Event inventory PDF generator

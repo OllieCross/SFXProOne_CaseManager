@@ -74,3 +74,4 @@ infrastructure/**/.env
 # Sensitive Documentation
 # ----------------------------------------------------------------------
 networking.md
+.claude/

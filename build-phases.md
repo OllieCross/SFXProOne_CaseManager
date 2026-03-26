@@ -2,6 +2,7 @@
 
 This document tracks the implementation plan for the full-stack CaseManager application.
 Each phase builds on the previous one and results in a testable milestone.
+v1.0.0. build
 
 ---
 
@@ -221,151 +222,80 @@ Verified by:
 
 ---
 
-## Phase 8 - DNS & Server Infrastructure Setup [PENDING]
+## Phase 8 - DNS & Server Infrastructure Setup [COMPLETE]
 
 Goal: The server is ready to receive the application.
 Traefik is running and issuing certificates, Authentik is deployed and configured,
 and DNS is pointing at the server's public IP.
-This phase is done via Claude Code in the server terminal - not in this local session.
 
-Pre-requisites:
+Files written:
 
-- A Linux server (Ubuntu 22.04 or Debian 12 recommended) with Docker + Docker Compose installed
-- The server's public IPv4 address is known
+- `infrastructure/traefik/traefik.yml` - static config: entryPoints (80->443 redirect, 443), Let's Encrypt TLS challenge, docker provider (exposedByDefault false, network proxy)
+- `infrastructure/traefik/dynamic_conf.yml` - TLS 1.2+ cipher suite, secHeaders middleware (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy camera=self)
+- `infrastructure/traefik/docker-compose.yml` - Traefik v3 with `user: root` and `userns_mode: host` (required because host has userns-remap enabled)
+- `infrastructure/authentik/docker-compose.yml` - authentik-server, authentik-worker, postgres:16, redis:7 on isolated internal network; server exposed via Traefik labels
+- `infrastructure/authentik/.env.example` - documents AUTHENTIK_SECRET_KEY, AUTHENTIK_POSTGRES_PASSWORD, AUTHENTIK_REDIS_PASSWORD
 
-Step 1 - DNS setup on websupport.sk:
+Server-side setup (not in git - secrets):
 
-- Log in to websupport.sk -> Sprava domeny -> DNS zaznamy for the target domain
-- Add an A record: `sfxproone.olliecross.com` -> server public IP, TTL 300
-- Add a CNAME record: `auth.sfxproone.olliecross.com` -> `sfxproone.olliecross.com` (for Authentik)
-- Wait for propagation (5-30 min); verify with `dig sfxproone.olliecross.com`
+- `/opt/traefik/` - Traefik config files + acme.json (chmod 600, owned by root for container access)
+- `/opt/authentik/.env` - Authentik secrets (generated with openssl rand)
+- `proxy` Docker network created for cross-stack Traefik routing
 
-Step 2 - Server baseline:
+Lessons learned / gotchas:
 
-```bash
-docker network create proxy
-mkdir -p /opt/traefik /opt/authentik
-touch /opt/traefik/acme.json && chmod 600 /opt/traefik/acme.json
-```
-
-Step 3 - Write infrastructure config files (Claude Code will write these on the server):
-
-- `infrastructure/traefik/traefik.yml` - static config:
-  - entryPoints: web (80, redirect to websecure), websecure (443)
-  - certificatesResolvers.letsencrypt.acme: email, tlsChallenge, storage at /acme.json
-  - providers.docker: exposedByDefault false, network proxy
-  - api.dashboard false (disabled for security)
-
-- `infrastructure/traefik/dynamic_conf.yml` - dynamic config:
-  - TLS options: minVersion VersionTLS12, cipherSuites (modern safe list)
-  - Middleware `secHeaders`: X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy (camera=self for QR scanner)
-
-- `infrastructure/authentik/docker-compose.yml` - standalone Authentik stack:
-  - Services: authentik-server, authentik-worker, postgresql (separate from app DB), redis
-  - Traefik labels to expose at `auth.sfxproone.olliecross.com` with TLS + secHeaders middleware
-  - Volumes: authentik-db-data, authentik-media, authentik-certs
-  - Env: AUTHENTIK_SECRET_KEY, AUTHENTIK_POSTGRESQL__* vars
-
-Step 4 - Deploy Traefik:
-
-```bash
-docker compose -f /opt/traefik/docker-compose.yml up -d
-# verify: docker logs traefik | grep "Certificate obtained"
-```
-
-Step 5 - Deploy Authentik:
-
-```bash
-cd /opt/authentik && docker compose up -d
-# wait ~60s for first boot, then open https://auth.sfxproone.olliecross.com/if/flow/initial-setup/
-# complete the admin setup wizard
-```
-
-Step 6 - Configure Authentik OIDC provider:
-
-- Admin UI -> Applications -> Providers -> Create -> OAuth2/OpenID Provider
-  - Name: CaseManager
-  - Client ID: (auto-generated, copy it)
-  - Client Secret: (auto-generated, copy it)
-  - Redirect URIs: `https://sfxproone.olliecross.com/api/auth/callback/authentik`
-  - Scopes: openid, email, profile
-- Admin UI -> Applications -> Create
-  - Name: CaseManager, Slug: casemanager, Provider: CaseManager
-- Admin UI -> Directory -> Groups -> Create group `sfxproone-editors` and `sfxproone-admins`
-  - Property Mappings: add a custom mapping that exposes group membership as a `role` claim
-- Copy AUTHENTIK_CLIENT_ID and AUTHENTIK_CLIENT_SECRET to the app .env on the server
+- Host has `"userns-remap": "default"` in `/etc/docker/daemon.json` - container root maps to unprivileged host UID. Traefik needs `userns_mode: "host"` to access docker.sock and acme.json
+- acme.json must be owned by root (not the SSH user) so the Traefik container (running as root via userns_mode host) can write it
+- Authentik auto-bootstraps `akadmin` on first start; the `/if/flow/initial-setup/` URL is blocked if any superuser exists. Use `docker exec authentik-worker ak create_recovery_key 10 akadmin` to get a login link
+- Authentik OIDC provider: scope mapping uses `ak_is_group_member()` expression to return ADMIN/EDITOR/VIEWER role claim
 
 Verified by:
 
-- `https://auth.sfxproone.olliecross.com` loads the Authentik login page over HTTPS
-- `https://sfxproone.olliecross.com` resolves (Traefik returns 502 until Phase 9 - that is expected)
-- Authentik OIDC provider is created and redirect URI is saved
-- `dig sfxproone.olliecross.com` returns the correct server IP
+- `https://auth.sfxproone.olliecross.com` loads the Authentik login page over HTTPS with valid Let's Encrypt cert
+- Traefik logs show ACME provider started and connected to `acme-v02.api.letsencrypt.org`
+- Authentik OIDC provider created with redirect URI `https://sfxproone.olliecross.com/api/auth/callback/authentik`
+- Groups `sfxproone-editors` and `sfxproone-admins` created
+- CaseManager role scope mapping configured
 
 ---
 
-## Phase 9 - Production Deployment [PENDING]
+## Phase 9 - Production Deployment [COMPLETE]
 
 Goal: The application is live on the server over HTTPS with SSO login working.
-This phase is done via Claude Code in the server terminal - not in this local session.
 
-Pre-requisites:
+App lives at: `/home/olliecross/sfxproone` on the server (cloned from GitHub).
+Production `.env` lives at: `/home/olliecross/sfxproone/.env` (600 permissions, never committed).
 
-- Phase 7 complete (Dockerfile exists and builds locally)
-- Phase 8 complete (Traefik + Authentik running, DNS propagated, OIDC provider configured)
+Files written / changed during this phase:
 
-Step 1 - Clone or copy the project onto the server:
+- `Dockerfile` - updated runner stage to copy full node_modules from deps stage (Prisma v6 CLI has many transitive deps including `effect` and WASM files that cannot be cherry-picked); added `entrypoint.sh` as CMD
+- `entrypoint.sh` - runs `prisma migrate deploy` on every container start (idempotent), then `exec node server.js`
+- `.dockerignore` - removed `prisma/migrations` exclusion (migrations must be in the image for `migrate deploy` to work)
+- `.env.example` - added `AUTH_TRUST_HOST=true` (required by NextAuth v5 behind any reverse proxy)
 
-```bash
-git clone <repo-url> /opt/sfxproone
-# or: rsync -av --exclude node_modules --exclude .next . user@server:/opt/sfxproone
-```
-
-Step 2 - Create the production .env on the server:
+Deploy commands (for future re-deploys):
 
 ```bash
-cp /opt/sfxproone/.env.example /opt/sfxproone/.env
-# Edit /opt/sfxproone/.env:
-#   DATABASE_URL=postgresql://casemanager:STRONG_PASSWORD@postgres:5432/casemanager
-#   REDIS_URL=redis://redis:6379
-#   MINIO_ENDPOINT=minio
-#   MINIO_PORT=9000
-#   MINIO_ACCESS_KEY=...
-#   MINIO_SECRET_KEY=...
-#   AUTH_SECRET=<random 32-char string>
-#   NEXTAUTH_URL=https://sfxproone.olliecross.com
-#   AUTHENTIK_ISSUER=https://auth.sfxproone.olliecross.com/application/o/casemanager/
-#   AUTHENTIK_CLIENT_ID=<from Phase 8>
-#   AUTHENTIK_CLIENT_SECRET=<from Phase 8>
-```
-
-Step 3 - Build and start the app stack:
-
-```bash
-cd /opt/sfxproone
+cd /home/olliecross/sfxproone
+git pull
 docker compose build
 docker compose up -d
+# migrations run automatically on container start via entrypoint.sh
+# seed (first deploy only):
+docker compose exec nextjs-app node node_modules/ts-node/dist/bin.js --compiler-options '{"module":"CommonJS"}' prisma/seed.ts
 ```
 
-Step 4 - Run database migrations and seed:
+Lessons learned / gotchas:
 
-```bash
-docker compose exec nextjs-app npx prisma migrate deploy
-docker compose exec nextjs-app node prisma/seed.js   # only on first deploy
-```
-
-Step 5 - Verify all services are healthy:
-
-```bash
-docker compose ps   # all services should show "healthy" or "running"
-docker compose logs nextjs-app --tail=50   # check for startup errors
-```
+- Prisma v6 CLI (`node_modules/.bin/prisma`) requires `prisma_schema_build_bg.wasm` and the `effect` package. Cherry-picking files in Dockerfile doesn't work - copy full node_modules from deps stage instead
+- `prisma/migrations` was excluded in `.dockerignore` - this must be included for `migrate deploy` to find migrations
+- NextAuth v5 behind Traefik requires `AUTH_TRUST_HOST=true` in `.env`, otherwise every request returns "UntrustedHost" error and the site shows "server configuration error"
+- `userns-remap` on the host means the app container also runs remapped; the `nextjs` user inside maps to an unprivileged host UID - this is correct and expected
 
 Verified by:
 
 - `https://sfxproone.olliecross.com` loads over HTTPS with a valid Let's Encrypt certificate
 - Credentials login works with `admin@sfxproone.com` / `admin123`
-- Authentik SSO login redirects correctly and returns to the app with role assigned
-- QR scanner works on a mobile device (camera permission prompt appears)
-- Admin can assign roles to users from the /admin panel
-- Login brute-force is blocked after 5 attempts (Redis rate-limit returns 429)
+- All 4 app containers healthy: sfxproone-app, sfxproone-postgres, sfxproone-redis, sfxproone-minio
+- Migrations applied automatically on startup via entrypoint.sh
+- Database seeded: 2 users + 3 sample cases
