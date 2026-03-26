@@ -1,4 +1,4 @@
-import { S3Client, CreateBucketCommand, HeadBucketCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, CreateBucketCommand, HeadBucketCommand, GetObjectCommand, DeleteObjectCommand, PutBucketCorsCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 export const s3 = new S3Client({
@@ -23,6 +23,23 @@ export async function ensureBucket() {
   } catch {
     await s3.send(new CreateBucketCommand({ Bucket: BUCKET }))
   }
+
+  // Allow the browser to PUT files directly to MinIO from the app origin.
+  // Re-applied on every cold start so it survives bucket recreation.
+  await s3.send(new PutBucketCorsCommand({
+    Bucket: BUCKET,
+    CORSConfiguration: {
+      CORSRules: [
+        {
+          AllowedOrigins: [process.env.NEXTAUTH_URL ?? '*'],
+          AllowedMethods: ['PUT', 'GET', 'HEAD'],
+          AllowedHeaders: ['*'],
+          ExposeHeaders: ['ETag'],
+          MaxAgeSeconds: 3600,
+        },
+      ],
+    },
+  }))
 }
 
 export async function getFileUrl(fileKey: string, expiresIn = 3600): Promise<string> {
