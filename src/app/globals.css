@@ -53,6 +53,46 @@
 }
 
 /* ----------------------------------------------------------------
+   Changelog prose styles
+   ---------------------------------------------------------------- */
+
+.prose-changelog h1 {
+  @apply text-2xl font-black text-foreground mb-6;
+}
+
+.prose-changelog h2 {
+  @apply text-lg font-bold text-foreground mt-10 mb-3 pb-2 border-b border-white/10;
+}
+
+.prose-changelog h3 {
+  @apply text-sm font-semibold text-muted uppercase tracking-wider mt-5 mb-2;
+}
+
+.prose-changelog p {
+  @apply text-sm text-foreground/80 mb-3 leading-relaxed;
+}
+
+.prose-changelog ul {
+  @apply list-disc list-inside space-y-1 mb-4;
+}
+
+.prose-changelog li {
+  @apply text-sm text-foreground/80;
+}
+
+.prose-changelog code {
+  @apply text-xs bg-white/5 text-brand px-1.5 py-0.5 rounded;
+}
+
+.prose-changelog hr {
+  @apply border-white/10 my-2;
+}
+
+.prose-changelog a {
+  @apply text-brand hover:underline;
+}
+
+/* ----------------------------------------------------------------
    html5-qrcode overrides
    ---------------------------------------------------------------- */
 
