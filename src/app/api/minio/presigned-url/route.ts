@@ -56,7 +56,16 @@ export async function POST(req: Request) {
     ContentLength: maxBytes,
   })
 
-  const url = await getSignedUrl(s3, command, { expiresIn: 300 })
+  const internalUrl = await getSignedUrl(s3, command, { expiresIn: 300 })
+
+  // Rewrite the internal Docker hostname (e.g. http://minio:9000) to the
+  // public-facing HTTPS URL so the browser can PUT directly without hitting
+  // a mixed-content block.
+  const publicBase = new URL(process.env.MINIO_PUBLIC_URL!)
+  const rewritten = new URL(internalUrl)
+  rewritten.protocol = publicBase.protocol
+  rewritten.host = publicBase.host
+  const url = rewritten.toString()
 
   return NextResponse.json({ url, fileKey })
 }
