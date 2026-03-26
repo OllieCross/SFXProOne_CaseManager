@@ -80,10 +80,13 @@ services:
 volumes:
   postgres_data:
     name: sfxproone_postgres_data
+    external: true
   redis_data:
     name: sfxproone_redis_data
+    external: true
   minio_data:
     name: sfxproone_minio_data
+    external: true
 
 networks:
   internal:
