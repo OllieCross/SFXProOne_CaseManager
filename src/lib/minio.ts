@@ -1,15 +1,31 @@
 import { S3Client, CreateBucketCommand, HeadBucketCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
+// Internal client - used for server-side operations (ensureBucket, deleteFile)
 export const s3 = new S3Client({
   endpoint: `${process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http'}://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}`,
-  region: 'us-east-1', // MinIO requires a region value but ignores it
+  region: 'us-east-1',
   credentials: {
     accessKeyId: process.env.MINIO_ROOT_USER!,
     secretAccessKey: process.env.MINIO_ROOT_PASSWORD!,
   },
-  forcePathStyle: true, // required for MinIO
+  forcePathStyle: true,
 })
+
+// Public client - used for presigned URLs that the browser will fetch directly
+export const s3Public = process.env.MINIO_PUBLIC_URL
+  ? new S3Client({
+      endpoint: process.env.MINIO_PUBLIC_URL,
+      region: 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.MINIO_ROOT_USER!,
+        secretAccessKey: process.env.MINIO_ROOT_PASSWORD!,
+      },
+      forcePathStyle: true,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
+    })
+  : s3
 
 export const BUCKET = process.env.MINIO_BUCKET!
 
@@ -29,7 +45,7 @@ export async function ensureBucket() {
 
 export async function getFileUrl(fileKey: string, expiresIn = 3600): Promise<string> {
   const command = new GetObjectCommand({ Bucket: BUCKET, Key: fileKey })
-  return getSignedUrl(s3, command, { expiresIn })
+  return getSignedUrl(s3Public, command, { expiresIn })
 }
 
 export async function deleteFile(fileKey: string): Promise<void> {
