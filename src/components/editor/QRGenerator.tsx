@@ -128,24 +128,16 @@ export default function QRGenerator() {
               Generate QR
             </button>
             {generated && (
-              <button onClick={download} className="btn-primary text-sm flex-1 bg-green-600 hover:bg-green-500">
+              <button onClick={download} className="btn-primary text-sm flex-1">
                 Download QR code
               </button>
             )}
           </div>
 
-          {/* Preview */}
-          {generated && (
-            <div className="rounded-lg overflow-hidden border border-white/10">
-              <canvas
-                ref={canvasRef}
-                className="w-full h-auto"
-              />
-            </div>
-          )}
-
-          {/* Hidden canvas used before preview is shown */}
-          {!generated && <canvas ref={canvasRef} className="hidden" />}
+          {/* Canvas - always mounted so the ref is stable across renders */}
+          <div className={`rounded-lg overflow-hidden border border-white/10 ${generated ? '' : 'hidden'}`}>
+            <canvas ref={canvasRef} className="w-full h-auto" />
+          </div>
         </div>
       </div>
     </>
