@@ -79,8 +79,11 @@ services:
 
 volumes:
   postgres_data:
+    name: sfxproone_postgres_data
   redis_data:
+    name: sfxproone_redis_data
   minio_data:
+    name: sfxproone_minio_data
 
 networks:
   internal:

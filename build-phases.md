@@ -2,6 +2,7 @@
 
 This document tracks the implementation plan for the full-stack CaseManager application.
 Each phase builds on the previous one and results in a testable milestone.
+
 v1.0.0. build
 
 ---
