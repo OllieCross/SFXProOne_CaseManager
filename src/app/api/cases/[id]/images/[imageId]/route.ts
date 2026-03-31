@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { deleteFile } from '@/lib/minio'
+import { logAudit } from '@/lib/audit'
 
 type RouteParams = { params: Promise<{ id: string; imageId: string }> }
 
@@ -22,6 +23,7 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
 
   await deleteFile(image.fileKey)
   await prisma.image.delete({ where: { id: imageId } })
+  await logAudit('IMAGE_DELETED', session.user.id, id, { fileName: image.fileName })
 
   return new NextResponse(null, { status: 204 })
 }

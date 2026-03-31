@@ -19,8 +19,8 @@ export default function Header() {
 
   const navLinks = [
     { href: '/scan', label: 'Scan', minRole: 'VIEWER' },
-    { href: '/editor', label: 'Editor', minRole: 'EDITOR' },
-    { href: '/admin', label: 'Admin', minRole: 'ADMIN' },
+    { href: '/editor', label: 'Inventory', minRole: 'VIEWER' },
+    { href: '/events', label: 'Events', minRole: 'VIEWER' },
   ]
 
   const roleOrder = ['VIEWER', 'EDITOR', 'ADMIN']
@@ -28,7 +28,7 @@ export default function Header() {
     roleOrder.indexOf(role) >= roleOrder.indexOf(minRole)
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-background/80 backdrop-blur-md pt-[env(safe-area-inset-top)]">
       <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
         {/* Logo + title */}
         <Link href="/scan" className="flex items-center gap-2.5 shrink-0">

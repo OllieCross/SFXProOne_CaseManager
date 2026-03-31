@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { logAudit } from '@/lib/audit'
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
@@ -69,6 +70,8 @@ export async function POST(req: Request) {
       createdBy: { select: { id: true, name: true } },
     },
   })
+
+  await logAudit('CASE_CREATED', session.user.id, created.id, { caseName: created.name })
 
   return NextResponse.json(created, { status: 201 })
 }

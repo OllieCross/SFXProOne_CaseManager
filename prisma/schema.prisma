@@ -14,20 +14,37 @@ enum Role {
 }
 
 enum DocType {
-  MANUAL
-  CERTIFICATE
-  OTHER
+  Manual
+  Certificate
+  Other
+  Bill
+  Order
+  Invoice
+  ServiceReport
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   name         String
-  email        String   @unique
+  email        String     @unique
   password     String?
-  createdAt    DateTime @default(now())
-  role         Role     @default(VIEWER)
-  casesCreated Case[]   @relation("CreatedBy")
-  casesUpdated Case[]   @relation("UpdatedBy")
+  createdAt    DateTime   @default(now())
+  role         Role       @default(VIEWER)
+  casesCreated Case[]     @relation("CreatedBy")
+  casesUpdated Case[]     @relation("UpdatedBy")
+  auditLogs    AuditLog[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  targetId  String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt(sort: Desc)])
 }
 
 model Case {

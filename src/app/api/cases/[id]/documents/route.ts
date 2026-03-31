@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { logAudit } from '@/lib/audit'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
 const schema = z.object({
   title: z.string().min(1).max(100),
-  type: z.enum(['MANUAL', 'CERTIFICATE', 'OTHER']),
+  type: z.enum(['Manual', 'Certificate', 'Other', 'Bill', 'Order', 'Invoice', 'ServiceReport']),
   fileKey: z.string().min(1),
   fileName: z.string().min(1),
   fileSize: z.number().int().positive(),
@@ -35,6 +36,8 @@ export async function POST(req: Request, { params }: RouteParams) {
     where: { id },
     data: { updatedById: session.user.id },
   })
+
+  await logAudit('DOCUMENT_UPLOADED', session.user.id, id, { title: parsed.data.title, fileName: parsed.data.fileName })
 
   return NextResponse.json(document, { status: 201 })
 }

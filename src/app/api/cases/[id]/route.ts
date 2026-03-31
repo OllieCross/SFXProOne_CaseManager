@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { logAudit } from '@/lib/audit'
 
 const updateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -102,6 +103,8 @@ export async function PUT(req: Request, { params }: RouteParams) {
     })
   })
 
+  await logAudit('CASE_UPDATED', session.user.id, id, { caseName: updated.name })
+
   return NextResponse.json(updated)
 }
 
@@ -114,6 +117,8 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
   }
 
   const { id } = await params
+  const caseData = await prisma.case.findUnique({ where: { id }, select: { name: true } })
   await prisma.case.delete({ where: { id } })
+  await logAudit('CASE_DELETED', session.user.id, id, { caseName: caseData?.name })
   return new NextResponse(null, { status: 204 })
 }

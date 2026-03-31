@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { logAudit } from '@/lib/audit'
 
 const schema = z.object({
   role: z.enum(['VIEWER', 'EDITOR', 'ADMIN']),
@@ -27,10 +28,18 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 })
   }
 
+  const existing = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, name: true } })
+
   const user = await prisma.user.update({
     where: { id: userId },
     data: { role: parsed.data.role },
     select: { id: true, name: true, email: true, role: true },
+  })
+
+  await logAudit('ROLE_CHANGED', session.user.id, userId, {
+    targetName: user.name,
+    oldRole: existing?.role,
+    newRole: user.role,
   })
 
   return NextResponse.json(user)

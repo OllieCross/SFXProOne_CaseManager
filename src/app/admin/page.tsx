@@ -5,15 +5,56 @@ import Header from '@/components/layout/Header'
 import RoleSelector from '@/components/admin/RoleSelector'
 import { formatDate } from '@/lib/utils'
 
+const ACTION_LABEL: Record<string, string> = {
+  CASE_CREATED:      'Created case',
+  CASE_UPDATED:      'Updated case',
+  CASE_DELETED:      'Deleted case',
+  IMAGE_UPLOADED:    'Uploaded image',
+  IMAGE_DELETED:     'Deleted image',
+  DOCUMENT_UPLOADED: 'Uploaded document',
+  DOCUMENT_DELETED:  'Deleted document',
+  ITEM_MOVED:        'Moved item',
+  ROLE_CHANGED:      'Changed role',
+}
+
+function auditDetail(action: string, meta: Record<string, unknown> | null): string {
+  if (!meta) return ''
+  switch (action) {
+    case 'CASE_CREATED':
+    case 'CASE_UPDATED':
+    case 'CASE_DELETED':
+      return (meta.caseName as string) ?? ''
+    case 'IMAGE_UPLOADED':
+    case 'IMAGE_DELETED':
+      return (meta.fileName as string) ?? ''
+    case 'DOCUMENT_UPLOADED':
+    case 'DOCUMENT_DELETED':
+      return (meta.title as string) ?? (meta.fileName as string) ?? ''
+    case 'ITEM_MOVED':
+      return (meta.itemName as string) ?? ''
+    case 'ROLE_CHANGED':
+      return `${meta.targetName}: ${meta.oldRole} -> ${meta.newRole}`
+    default:
+      return ''
+  }
+}
+
 export default async function AdminPage() {
   const session = await auth()
   if (!session) redirect('/login')
   if (session.user.role !== 'ADMIN') redirect('/scan')
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: 'asc' },
-    select: { id: true, name: true, email: true, role: true, createdAt: true },
-  })
+  const [users, auditLogs] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, name: true, email: true, role: true, createdAt: true },
+    }),
+    prisma.auditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+      include: { user: { select: { name: true } } },
+    }),
+  ])
 
   return (
     <>
@@ -58,12 +99,45 @@ export default async function AdminPage() {
 
         <section>
           <h2 className="text-lg font-semibold mb-1">Audit Log</h2>
-          <p className="text-sm text-gray-400 mb-4">
-            A record of case edits, uploads, and role changes.
-          </p>
-          <div className="card flex items-center justify-center py-12 text-gray-500 text-sm">
-            Audit logging is not yet implemented.
-          </div>
+          <p className="text-sm text-gray-400 mb-4">Last 100 events, most recent first.</p>
+
+          {auditLogs.length === 0 ? (
+            <div className="card flex items-center justify-center py-12 text-gray-500 text-sm">
+              No events recorded yet.
+            </div>
+          ) : (
+            <div className="card overflow-hidden p-0">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 text-left text-gray-400">
+                    <th className="px-4 py-3 font-medium">When</th>
+                    <th className="px-4 py-3 font-medium">User</th>
+                    <th className="px-4 py-3 font-medium">Action</th>
+                    <th className="px-4 py-3 font-medium">Detail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {auditLogs.map((log, i) => (
+                    <tr
+                      key={log.id}
+                      className={i < auditLogs.length - 1 ? 'border-b border-white/5' : ''}
+                    >
+                      <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
+                        {formatDate(log.createdAt)}
+                      </td>
+                      <td className="px-4 py-3 font-medium">{log.user.name}</td>
+                      <td className="px-4 py-3 text-gray-300">
+                        {ACTION_LABEL[log.action] ?? log.action}
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 truncate max-w-[200px]">
+                        {auditDetail(log.action, log.meta as Record<string, unknown> | null)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       </main>
     </>

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { logAudit } from '@/lib/audit'
 
 type RouteParams = { params: Promise<{ id: string; itemId: string }> }
 
@@ -33,6 +34,8 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     where: { id: itemId },
     data: { caseId: targetCaseId },
   })
+
+  await logAudit('ITEM_MOVED', session.user.id, id, { itemName: item.name, targetCaseId })
 
   return NextResponse.json(updated)
 }

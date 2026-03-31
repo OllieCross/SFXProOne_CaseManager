@@ -111,23 +111,43 @@ This project relies on **Authentik** via NextAuth. Ensure that your Authentik in
 
 ## ✅ To-Do List
 
-- [x] basic features
-- [x] server deploy
 - [x] favicon.ico implementation
 - [x] fix sign out points to localhost:3000
 - [x] default rear camera option
 - [x] Release Notes page
 - [x] No Case found Page
 - [x] Footer with credits, github, linkedin, instagram, copyrights
-- [x] QR code generator
+- [x] QR "code" generator
+- [x] rename editor tab to Inventory
+- [x] Audit logging
+- [x] Inventory search
+- [x] iphone header background overflow
+- [x] add new case tab doesnt allow uploading photos and PDFs
+- [x] iphone footer under home button
+- [x] Camelcase enums in DB
+- [ ] After Move The selected case appears on an another item in the case
+- [ ] Itemy - servisne kontroly a revizie - LOGBOOK
+- [ ] Bigger or drag/Drop buttons items sort
+- [ ] Items without QR codes - prechody, flase, zabradlie
+- [ ] Groups & Bundles ? zabradlie, balik svetla, balik rezia
+- [ ] After save changes the case page shows old version of the edited case
+- [ ] does Minio delete files after removing from case ?
+- [ ] fixtures/machines granularity
+- [ ] Bigger QR code sticker font
+- [ ] new update popup or snackbar
+- [ ] photo/item/document delete confirmation
+- [ ] all passwords regenerate
+- [x] Edit button in case details
 - [ ] Dockerfile optimizations
 - [ ] admin user management
 - [ ] Migrate Authentik and Traefik to separate folders outside project codebase
 - [ ] Light/Dark mode switch based on OS settings
 - [ ] /edit - option to edit the assigned qr code to case
-- [ ] /scan - option to ist all available cases
 - [ ] DB daily backup
-- [ ] password changer
+- [ ] profile with password changer
 - [ ] Events organisation system
-- [ ] /events - date/location/time/contact/users/inventory/comment
+- [ ] /events - create/edit - past/future - date/location/time/contact/users/inventory/comment
+- [ ] /events topovanie dnešného eventu
 - [ ] Event inventory PDF generator
+- [ ] rebrand to "Inventory Manager"
+- [ ] UAT Testing

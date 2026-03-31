@@ -75,17 +75,14 @@ export default function PDFViewer({ url, title }: Props) {
     )
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-32">
-        <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col items-center gap-3">
-      <canvas ref={canvasRef} className="w-full rounded-lg border border-white/10" />
+      {loading && (
+        <div className="flex items-center justify-center h-32">
+          <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+      <canvas ref={canvasRef} className={`w-full rounded-lg border border-white/10${loading ? ' hidden' : ''}`} />
 
       {numPages > 1 && (
         <div className="flex items-center gap-4">

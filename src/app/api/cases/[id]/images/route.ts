@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { logAudit } from '@/lib/audit'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -33,6 +34,8 @@ export async function POST(req: Request, { params }: RouteParams) {
     where: { id },
     data: { updatedById: session.user.id },
   })
+
+  await logAudit('IMAGE_UPLOADED', session.user.id, id, { fileName: parsed.data.fileName })
 
   return NextResponse.json(image, { status: 201 })
 }

@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/utils'
 import Header from '@/components/layout/Header'
 import CaseGallery from '@/components/media/CaseGallery'
 import PDFViewer from '@/components/media/PDFViewer'
+import Link from 'next/link'
 
 export default async function CasePage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -25,6 +26,8 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
   })
 
   if (!caseData) notFound()
+
+  const canEdit = ['EDITOR', 'ADMIN'].includes(session.user.role)
 
   // Generate presigned GET URLs server-side (1 hour expiry)
   const imageUrls = await Promise.all(
@@ -52,10 +55,17 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-8 pb-16">
 
         {/* Case header */}
-        <div>
-          <h1 className="text-2xl font-bold">{caseData.name}</h1>
-          {caseData.description && (
-            <p className="text-muted mt-1 text-sm">{caseData.description}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">{caseData.name}</h1>
+            {caseData.description && (
+              <p className="text-muted mt-1 text-sm">{caseData.description}</p>
+            )}
+          </div>
+          {canEdit && (
+            <Link href={`/editor/${id}`} className="btn-primary text-sm shrink-0">
+              Edit Case
+            </Link>
           )}
         </div>
 

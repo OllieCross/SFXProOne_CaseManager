@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 const SOCIAL_LINKS = [
   {
@@ -36,8 +39,11 @@ const SOCIAL_LINKS = [
 ]
 
 export default function Footer() {
+  const { data: session } = useSession()
+  const isAdmin = session?.user?.role === 'ADMIN'
+
   return (
-    <footer className="border-t border-white/10 mt-auto py-4 px-4">
+    <footer className="border-t border-white/10 mt-auto pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] px-4">
       <div className="max-w-3xl mx-auto flex items-center justify-between text-xs text-muted">
         {/* Credits */}
         <div className="flex items-center gap-2.5">
@@ -58,9 +64,16 @@ export default function Footer() {
           </div>
         </div>
 
-        <Link href="/changelog" className="hover:text-foreground transition-colors">
-          Release notes
-        </Link>
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <Link href="/admin" className="hover:text-foreground transition-colors">
+              Admin
+            </Link>
+          )}
+          <Link href="/changelog" className="hover:text-foreground transition-colors">
+            Release notes
+          </Link>
+        </div>
       </div>
     </footer>
   )
