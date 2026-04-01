@@ -23,16 +23,43 @@ enum DocType {
   ServiceReport
 }
 
+enum DeviceStatus {
+  Working
+  Faulty
+  InRepair
+  Retired
+  Lost
+  RentedToFriend
+}
+
+enum EventStatus {
+  Planned
+  Confirmed
+  Completed
+  Cancelled
+  NeedsDetails
+}
+
+enum InvoiceStatus {
+  Paid
+  NotPaid
+  DepositPaid
+  DepositNotYetPaid
+  NotPaidInFull
+}
+
 model User {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  password     String?
-  createdAt    DateTime   @default(now())
-  role         Role       @default(VIEWER)
-  casesCreated Case[]     @relation("CreatedBy")
-  casesUpdated Case[]     @relation("UpdatedBy")
-  auditLogs    AuditLog[]
+  id             String           @id @default(cuid())
+  name           String
+  email          String           @unique
+  password       String?
+  createdAt      DateTime         @default(now())
+  role           Role             @default(VIEWER)
+  casesCreated   Case[]           @relation("CreatedBy")
+  casesUpdated   Case[]           @relation("UpdatedBy")
+  auditLogs      AuditLog[]
+  logbookEntries LogbookEntry[]
+  eventStagehands EventStagehand[]
 }
 
 model AuditLog {
@@ -48,33 +75,40 @@ model AuditLog {
 }
 
 model Case {
-  id          String     @id @default(cuid())
-  name        String
-  description String?
+  id                String       @id @default(cuid())
+  name              String
+  description       String?
   // qrdata holds the raw QR code payload - could be a UUID string, legacy Google Keep URL,
   // or any other arbitrary string read from a physical sticker.
-  qrdata      String     @unique
-  items       Item[]
-  images      Image[]
-  documents   Document[]
-  createdById String
-  createdBy   User       @relation("CreatedBy", fields: [createdById], references: [id])
-  updatedById String?
-  updatedBy   User?      @relation("UpdatedBy", fields: [updatedById], references: [id])
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  qrdata            String       @unique
+  warehouseLocation String?
+  notes             String?
+  items             Item[]
+  devices           Device[]
+  images            Image[]
+  documents         Document[]
+  createdById       String
+  createdBy         User         @relation("CreatedBy", fields: [createdById], references: [id])
+  updatedById       String?
+  updatedBy         User?        @relation("UpdatedBy", fields: [updatedById], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  groupCases        GroupCase[]
+  eventCases        EventCase[]
 }
 
 model Item {
-  id        String   @id @default(cuid())
-  caseId    String
-  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  name      String
-  quantity  Int      @default(1)
-  comment   String?
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String      @id @default(cuid())
+  caseId     String?
+  case       Case?       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  name       String
+  quantity   Int         @default(1)
+  comment    String?
+  sortOrder  Int         @default(0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  groupItems GroupItem[]
+  eventItems EventItem[]
 }
 
 model Image {
@@ -99,4 +133,186 @@ model Document {
   fileSize  Int
   mimeType  String
   createdAt DateTime @default(now())
+}
+
+model Device {
+  id             String          @id @default(cuid())
+  name           String
+  qrCode         String          @unique
+  serialNumber   String?
+  purchaseDate   DateTime?
+  status         DeviceStatus    @default(Working)
+  caseId         String?
+  case           Case?           @relation(fields: [caseId], references: [id])
+  notes          String?
+  images         DeviceImage[]
+  documents      DeviceDocument[]
+  logbook        LogbookEntry[]
+  groupDevices   GroupDevice[]
+  eventDevices   EventDevice[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model LogbookEntry {
+  id        String   @id @default(cuid())
+  deviceId  String
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  date      DateTime
+  comment   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model DeviceImage {
+  id        String   @id @default(cuid())
+  deviceId  String
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  fileKey   String   @unique
+  fileName  String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+}
+
+model DeviceDocument {
+  id        String   @id @default(cuid())
+  deviceId  String
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  title     String
+  type      DocType
+  fileKey   String   @unique
+  fileName  String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+}
+
+model Consumable {
+  id               String             @id @default(cuid())
+  name             String
+  unit             String
+  stockQuantity    Float              @default(0)
+  notes            String?
+  groupConsumables GroupConsumable[]
+  eventConsumables EventConsumable[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model Group {
+  id               String            @id @default(cuid())
+  name             String
+  cases            GroupCase[]
+  devices          GroupDevice[]
+  items            GroupItem[]
+  consumables      GroupConsumable[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model GroupCase {
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  caseId  String
+  case    Case   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, caseId])
+}
+
+model GroupDevice {
+  groupId  String
+  group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, deviceId])
+}
+
+model GroupItem {
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  itemId  String
+  item    Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, itemId])
+}
+
+model GroupConsumable {
+  groupId        String
+  group          Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  consumableId   String
+  consumable     Consumable @relation(fields: [consumableId], references: [id], onDelete: Cascade)
+  quantityNeeded Float      @default(1)
+
+  @@id([groupId, consumableId])
+}
+
+model Event {
+  id            String           @id @default(cuid())
+  name          String
+  venueName     String
+  location      String?
+  startDate     DateTime
+  endDate       DateTime
+  clientPhone   String?
+  clientEmail   String?
+  comments      String?
+  status        EventStatus      @default(Planned)
+  invoiceStatus InvoiceStatus    @default(NotPaid)
+  stagehands    EventStagehand[]
+  cases         EventCase[]
+  devices       EventDevice[]
+  items         EventItem[]
+  consumables   EventConsumable[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model EventStagehand {
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@id([eventId, userId])
+}
+
+model EventCase {
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  caseId  String
+  case    Case   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, caseId])
+}
+
+model EventDevice {
+  eventId  String
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, deviceId])
+}
+
+model EventItem {
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  itemId  String
+  item    Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, itemId])
+}
+
+model EventConsumable {
+  eventId        String
+  event          Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  consumableId   String
+  consumable     Consumable @relation(fields: [consumableId], references: [id], onDelete: Cascade)
+  quantityNeeded Float
+  quantityUsed   Float?
+
+  @@id([eventId, consumableId])
 }

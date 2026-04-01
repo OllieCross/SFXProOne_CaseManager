@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { SessionProvider } from 'next-auth/react'
 import Footer from '@/components/layout/Footer'
+import UpdateSnackbar from '@/components/ui/UpdateSnackbar'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="min-h-screen flex flex-col">
             {children}
             <Footer />
+            <UpdateSnackbar />
           </div>
         </SessionProvider>
       </body>

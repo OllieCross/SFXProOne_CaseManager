@@ -4,6 +4,23 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { formatBytes } from '@/lib/utils'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const QRScanner = dynamic(() => import('@/components/scanner/QRScanner'), { ssr: false })
 
@@ -166,6 +183,14 @@ export default function CaseEditorForm({ mode, caseId, initialData, allCases = [
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  // Confirm modal state
+  type ConfirmTarget =
+    | { kind: 'item'; index: number }
+    | { kind: 'image'; id: string; name: string }
+    | { kind: 'document'; id: string; name: string }
+  const [confirmTarget, setConfirmTarget] = useState<ConfirmTarget | null>(null)
+  const [confirmLoading, setConfirmLoading] = useState(false)
+
   const imageInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const docInputRef = useRef<HTMLInputElement>(null)
@@ -184,13 +209,18 @@ export default function CaseEditorForm({ mode, caseId, initialData, allCases = [
     setItems((prev) => prev.filter((_, i) => i !== index).map((item, i) => ({ ...item, sortOrder: i })))
   }
 
-  function moveItem(index: number, dir: -1 | 1) {
-    const next = index + dir
-    if (next < 0 || next >= items.length) return
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
     setItems((prev) => {
-      const arr = [...prev]
-      ;[arr[index], arr[next]] = [arr[next], arr[index]]
-      return arr.map((item, i) => ({ ...item, sortOrder: i }))
+      const oldIndex = prev.findIndex((item, i) => (item.id ?? String(i)) === active.id)
+      const newIndex = prev.findIndex((item, i) => (item.id ?? String(i)) === over.id)
+      return arrayMove(prev, oldIndex, newIndex).map((item, i) => ({ ...item, sortOrder: i }))
     })
   }
 
@@ -275,6 +305,20 @@ export default function CaseEditorForm({ mode, caseId, initialData, allCases = [
     if (!activeCaseId) return
     await fetch(`/api/cases/${activeCaseId}/documents/${docId}`, { method: 'DELETE' })
     setDocuments((prev) => prev.filter((doc) => doc.id !== docId))
+  }
+
+  async function handleConfirmDelete() {
+    if (!confirmTarget) return
+    setConfirmLoading(true)
+    if (confirmTarget.kind === 'item') {
+      removeItem(confirmTarget.index)
+    } else if (confirmTarget.kind === 'image') {
+      await deleteImage(confirmTarget.id)
+    } else if (confirmTarget.kind === 'document') {
+      await deleteDocument(confirmTarget.id)
+    }
+    setConfirmLoading(false)
+    setConfirmTarget(null)
   }
 
   // ---------- Submit ----------
@@ -420,30 +464,28 @@ export default function CaseEditorForm({ mode, caseId, initialData, allCases = [
           <button type="button" onClick={addItem} className="text-brand text-sm hover:underline">+ Add Item</button>
         </div>
         {items.length === 0 && <p className="text-muted text-sm">No items yet.</p>}
-        <div className="space-y-2">
-          {items.map((item, i) => (
-            <div key={i} className="card flex gap-2 items-start">
-              <div className="flex flex-col gap-1 pt-1">
-                <button type="button" onClick={() => moveItem(i, -1)} disabled={i === 0} className="text-muted hover:text-foreground disabled:opacity-20 text-xs leading-none" aria-label="Move up">&uarr;</button>
-                <button type="button" onClick={() => moveItem(i, 1)} disabled={i === items.length - 1} className="text-muted hover:text-foreground disabled:opacity-20 text-xs leading-none" aria-label="Move down">&darr;</button>
-              </div>
-              <div className="flex-1 grid grid-cols-2 gap-2 min-w-0">
-                <input type="text" required className="input-field col-span-2" placeholder="Item name" value={item.name} onChange={(e) => updateItem(i, 'name', e.target.value)} />
-                <input type="number" min={1} className="input-field" placeholder="Qty" value={item.quantity} onChange={(e) => updateItem(i, 'quantity', parseInt(e.target.value) || 1)} />
-                <input type="text" className="input-field" placeholder="Comment (optional)" value={item.comment} onChange={(e) => updateItem(i, 'comment', e.target.value)} />
-              </div>
-              <div className="flex flex-col gap-1 pt-1">
-                {mode === 'edit' && item.id && allCases.length > 0 && (
-                  <select onChange={(e) => { if (e.target.value) moveItemToCase(item.id!, e.target.value) }} className="text-xs bg-surface border border-white/10 rounded text-muted" defaultValue="" title="Move to another case">
-                    <option value="">Move...</option>
-                    {allCases.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                )}
-                <button type="button" onClick={() => removeItem(i)} className="text-red-400/60 hover:text-red-400 text-xs transition-colors" aria-label="Remove item">Remove</button>
-              </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext
+            items={items.map((item, i) => item.id ?? String(i))}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {items.map((item, i) => (
+                <SortableItemRow
+                  key={item.id ?? i}
+                  id={item.id ?? String(i)}
+                  item={item}
+                  index={i}
+                  mode={mode}
+                  allCases={allCases}
+                  onUpdate={updateItem}
+                  onMoveToCase={moveItemToCase}
+                  onRemove={() => setConfirmTarget({ kind: 'item', index: i })}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       </section>
 
       {/* Photos */}
@@ -504,7 +546,7 @@ export default function CaseEditorForm({ mode, caseId, initialData, allCases = [
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={img.url} alt={img.fileName} className="w-full h-full object-cover" />
                     {img.id && (
-                      <button type="button" onClick={() => deleteImage(img.id!)} className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-500/80 transition-colors" aria-label="Delete photo">&times;</button>
+                      <button type="button" onClick={() => setConfirmTarget({ kind: 'image', id: img.id!, name: img.fileName })} className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-500/80 transition-colors" aria-label="Delete photo">&times;</button>
                     )}
                   </>
                 )}
@@ -593,7 +635,7 @@ export default function CaseEditorForm({ mode, caseId, initialData, allCases = [
                 <div className="flex items-center gap-2 shrink-0">
                   {doc.uploading && <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />}
                   {doc.id && (
-                    <button type="button" onClick={() => deleteDocument(doc.id!)} className="text-red-400/60 hover:text-red-400 text-xs transition-colors">Delete</button>
+                    <button type="button" onClick={() => setConfirmTarget({ kind: 'document', id: doc.id!, name: doc.title })} className="text-red-400/60 hover:text-red-400 text-xs transition-colors">Delete</button>
                   )}
                 </div>
               </div>
@@ -612,6 +654,80 @@ export default function CaseEditorForm({ mode, caseId, initialData, allCases = [
         <button type="button" onClick={() => router.back()} className="btn-ghost">Cancel</button>
       </div>
 
+      {confirmTarget && (
+        <ConfirmModal
+          title={
+            confirmTarget.kind === 'item' ? 'Remove item' :
+            confirmTarget.kind === 'image' ? 'Delete photo' : 'Delete document'
+          }
+          message={
+            confirmTarget.kind === 'item'
+              ? 'Remove this item from the gear list?'
+              : `Delete "${confirmTarget.name}"? This cannot be undone.`
+          }
+          confirmLabel={confirmTarget.kind === 'item' ? 'Remove' : 'Delete'}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmTarget(null)}
+          loading={confirmLoading}
+        />
+      )}
+
     </form>
+  )
+}
+
+// ---------- Sortable item row ----------
+
+type SortableItemRowProps = {
+  id: string
+  item: ItemRow
+  index: number
+  mode: 'create' | 'edit'
+  allCases: { id: string; name: string }[]
+  onUpdate: (index: number, field: keyof ItemRow, value: string | number) => void
+  onMoveToCase: (itemId: string, targetCaseId: string) => void
+  onRemove: () => void
+}
+
+function SortableItemRow({ id, item, index, mode, allCases, onUpdate, onMoveToCase, onRemove }: SortableItemRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className="card flex gap-2 items-start">
+      {/* Drag handle */}
+      <button
+        type="button"
+        className="text-muted hover:text-foreground pt-2 cursor-grab active:cursor-grabbing touch-none shrink-0"
+        aria-label="Drag to reorder"
+        {...attributes}
+        {...listeners}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+          <line x1="4" y1="7" x2="20" y2="7" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="17" x2="20" y2="17" />
+        </svg>
+      </button>
+      <div className="flex-1 grid grid-cols-2 gap-2 min-w-0">
+        <input type="text" required className="input-field col-span-2" placeholder="Item name" value={item.name} onChange={(e) => onUpdate(index, 'name', e.target.value)} />
+        <input type="number" min={1} className="input-field" placeholder="Qty" value={item.quantity} onChange={(e) => onUpdate(index, 'quantity', parseInt(e.target.value) || 1)} />
+        <input type="text" className="input-field" placeholder="Comment (optional)" value={item.comment} onChange={(e) => onUpdate(index, 'comment', e.target.value)} />
+      </div>
+      <div className="flex flex-col gap-1 pt-1">
+        {mode === 'edit' && item.id && allCases.length > 0 && (
+          <select onChange={(e) => { if (e.target.value) onMoveToCase(item.id!, e.target.value) }} className="text-xs bg-surface border border-white/10 rounded text-muted" defaultValue="" title="Move to another case">
+            <option value="">Move...</option>
+            {allCases.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        )}
+        <button type="button" onClick={onRemove} className="text-red-400/60 hover:text-red-400 text-xs transition-colors" aria-label="Remove item">Remove</button>
+      </div>
+    </div>
   )
 }

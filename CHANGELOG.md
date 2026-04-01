@@ -4,6 +4,112 @@ All notable changes to SFXProOne CaseManager are documented here.
 
 ---
 
+## v1.1.0 - 2026-04-01
+
+### Added
+
+- Audit log extended to cover all new entities:
+  - `CONSUMABLE_CREATED`, `CONSUMABLE_UPDATED`, `CONSUMABLE_STOCK_ADJUSTED` on consumable write operations
+  - `GROUP_CREATED`, `GROUP_UPDATED`, `GROUP_DELETED` on group write operations
+  - `EVENT_CREATED`, `EVENT_UPDATED`, `EVENT_COMPLETED` on event write operations
+- All new actions are visible in the Admin panel alongside existing case/device/role audit entries
+
+---
+
+## v1.0.9 - 2026-04-01
+
+### Added
+
+- Standalone items: items no longer require a case assignment; `Item.caseId` is now nullable
+- `/items/new` - create a standalone item (name, quantity, notes)
+- `/items/[id]/edit` - edit a standalone item
+- Inventory page now shows a Standalone Items section with count and Edit links
+- Migration `20260401000002_nullable_item_caseid` makes `Item.caseId` optional
+
+---
+
+## v1.0.8 - 2026-04-01
+
+### Added
+
+- Event model fully implemented: list, create, view, and edit pages at `/events`, `/events/new`, `/events/[id]`, `/events/[id]/edit`
+- Event fields: name, venue name, location, start/end date+time, client phone/email, comments, event status (Planned / Confirmed / Completed / Cancelled / Needs Details), invoice status (Paid / Not Paid / Deposit Paid / Deposit Not Yet Paid / Not Paid in Full)
+- Events support stagehands (existing users), cases, devices, items, and consumables as inventory
+- Consumables on an event carry a `quantityNeeded` and optional `quantityUsed` field
+- Add Group template to an existing event via the edit page (expands all group members into event inventory)
+- Marking an event as Completed automatically decrements each consumable's stock quantity by its `quantityUsed`
+- Events list page shows status and invoice status with colour coding, stagehand names, and inventory counts
+
+---
+
+## v1.0.7 - 2026-04-01
+
+### Added
+
+- Group model fully implemented: list, create, and edit pages at `/groups`, `/groups/new`, `/groups/[id]/edit`
+- Groups are reusable event templates that bundle Cases, Devices, Items, and Consumables together
+- Consumables in a group carry a `quantityNeeded` field (e.g. 2.5 kg titanium dust)
+- Adding/removing members in edit mode saves immediately via API without requiring a Save button
+- Events page "Groups" button now links to the live `/groups` page
+
+---
+
+## v1.0.6 - 2026-04-01
+
+### Added
+
+- Consumable model fully implemented: create and edit pages at `/consumables/new`, `/consumables/[id]/edit`
+- Consumable fields: name, unit (free text, e.g. kg / bag / cartridge), stock quantity (decimal), notes
+- Inventory page now shows Cases, Devices, and Consumables as three separate sections with counts
+- Stock quantity supports decimal values (e.g. 2.5 kg)
+
+---
+
+## v1.0.5 - 2026-04-01
+
+### Added
+
+- Device model fully implemented: create, view, and edit pages at `/devices/new`, `/devices/[id]`, `/devices/[id]/edit`
+- Device fields: name, QR code (with scanner), serial number, purchase date, status (Working / Faulty / In Repair / Retired / Lost / Rented to a Friend), optional case assignment, notes
+- Device detail page shows status with colour coding, info card, photos, documents, and logbook
+- Device logbook: add and delete maintenance entries (date + comment + user) from the edit page
+- Device photos and documents use the same presigned MinIO upload flow as cases
+- Inventory page now shows Cases and Devices as two separate sections with counts
+- Audit log extended with DEVICE_CREATED, DEVICE_UPDATED, DEVICE_DELETED, LOGBOOK_ENTRY_ADDED actions
+
+---
+
+## v1.0.4 - 2026-04-01
+
+### Added
+
+- Database: new `Device` model with status (`Working / Faulty / InRepair / Retired / Lost / RentedToFriend`), optional case assignment, serial number, purchase date, notes, photos, documents, and a maintenance logbook (date + comment + user per entry)
+- Database: new `Consumable` model for single-use stock items (confetti, pyro cartridges, titanium dust, etc.) with unit, stock quantity, and notes; stock decrements after event completion
+- Database: new `Group` model as a reusable event template bundling Cases, Devices, Items, and Consumables (with quantity per consumable entry)
+- Database: new `Event` model with venue, location, start/end date+time, client contact, stagehands (existing users), full inventory (Cases, Devices, Items, Consumables), status (`Planned / Confirmed / Completed / Cancelled / NeedsDetails`), and invoice status (`Paid / NotPaid / DepositPaid / DepositNotYetPaid / NotPaidInFull`)
+- Case now stores `warehouseLocation` (free text, e.g. "Warehouse A / Shelf 3") and `notes`
+- Inventory page header split into two rows: Row 1 is title + QR Generator; Row 2 (editors/admins) has + New Case, + New Item, + New Device, + New Consumable buttons
+- Events page header split into two rows: Row 1 is title; Row 2 (editors/admins) has + New Event and Groups buttons
+
+---
+
+## v1.0.3 - 2026-04-01
+
+### Added
+
+- Update snackbar: after a version bump, a blue snackbar appears at the bottom of the screen on first visit showing "App updated to vX.Y.Z"; auto-dismisses after 6 seconds; version is read live from CHANGELOG.md and tracked per-browser in localStorage
+- Editors can now delete cases (previously admin-only)
+- Inventory case cards now have a fixed-width button area so card width is consistent across all roles
+- Gear list items can now be reordered by drag-and-drop; up/down arrow buttons removed; supports mouse drag and long-press drag on touch devices
+- QR code label text size is now dynamic: scales up to fill the available width with padding, so short codes render large instead of small and fixed
+
+### Fixed
+
+- Moving an item to another case no longer causes the destination case name to bleed into the Move dropdown of the next item in the list (was caused by index-based React keys reusing DOM nodes after removal)
+- Delete confirmations now appear as a centered modal overlay instead of inline text within the card; applies to case deletion from inventory, and item, photo, and document deletion from the case editor
+
+---
+
 ## v1.0.2 - 2026-03-31
 
 ### Added

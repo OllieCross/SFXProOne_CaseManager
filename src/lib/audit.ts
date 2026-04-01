@@ -11,6 +11,19 @@ export type AuditAction =
   | 'DOCUMENT_DELETED'
   | 'ITEM_MOVED'
   | 'ROLE_CHANGED'
+  | 'DEVICE_CREATED'
+  | 'DEVICE_UPDATED'
+  | 'DEVICE_DELETED'
+  | 'LOGBOOK_ENTRY_ADDED'
+  | 'CONSUMABLE_CREATED'
+  | 'CONSUMABLE_UPDATED'
+  | 'CONSUMABLE_STOCK_ADJUSTED'
+  | 'GROUP_CREATED'
+  | 'GROUP_UPDATED'
+  | 'GROUP_DELETED'
+  | 'EVENT_CREATED'
+  | 'EVENT_UPDATED'
+  | 'EVENT_COMPLETED'
 
 export async function logAudit(
   action: AuditAction,

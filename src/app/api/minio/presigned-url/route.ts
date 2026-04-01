@@ -6,12 +6,22 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rateLimit'
 
-const schema = z.object({
-  caseId: z.string().min(1),
-  type: z.enum(['image', 'document']),
-  fileName: z.string().min(1),
-  mimeType: z.string().min(1),
-})
+const schema = z.union([
+  z.object({
+    caseId: z.string().min(1),
+    deviceId: z.undefined().optional(),
+    type: z.enum(['image', 'document']),
+    fileName: z.string().min(1),
+    mimeType: z.string().min(1),
+  }),
+  z.object({
+    deviceId: z.string().min(1),
+    caseId: z.undefined().optional(),
+    type: z.enum(['image', 'document']),
+    fileName: z.string().min(1),
+    mimeType: z.string().min(1),
+  }),
+])
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 const ALLOWED_DOC_TYPES = ['application/pdf']
@@ -34,7 +44,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 })
   }
 
-  const { caseId, type, fileName, mimeType } = parsed.data
+  const { type, fileName, mimeType } = parsed.data
+  const ownerId = parsed.data.deviceId ?? parsed.data.caseId!
+  const ownerPrefix = parsed.data.deviceId ? 'devices' : 'cases'
 
   const allowedTypes = type === 'image' ? ALLOWED_IMAGE_TYPES : ALLOWED_DOC_TYPES
   if (!allowedTypes.includes(mimeType)) {
@@ -44,7 +56,7 @@ export async function POST(req: Request) {
   await ensureBucket()
 
   const ext = fileName.split('.').pop() ?? ''
-  const fileKey = `${type}s/${caseId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const fileKey = `${type}s/${ownerPrefix}/${ownerId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
   const command = new PutObjectCommand({
     Bucket: BUCKET,

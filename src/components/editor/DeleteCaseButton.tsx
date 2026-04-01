@@ -2,47 +2,39 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 type Props = { caseId: string; caseName: string }
 
 export default function DeleteCaseButton({ caseId, caseName }: Props) {
   const router = useRouter()
-  const [confirming, setConfirming] = useState(false)
+  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function handleDelete() {
     setLoading(true)
     await fetch(`/api/cases/${caseId}`, { method: 'DELETE' })
+    setOpen(false)
     router.refresh()
   }
 
-  if (confirming) {
-    return (
-      <div className="flex items-center gap-1">
-        <span className="text-xs text-muted hidden sm:block">Delete &quot;{caseName}&quot;?</span>
-        <button
-          onClick={handleDelete}
-          disabled={loading}
-          className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors disabled:opacity-50"
-        >
-          {loading ? 'Deleting...' : 'Yes'}
-        </button>
-        <button
-          onClick={() => setConfirming(false)}
-          className="text-xs text-muted hover:text-foreground transition-colors"
-        >
-          No
-        </button>
-      </div>
-    )
-  }
-
   return (
-    <button
-      onClick={() => setConfirming(true)}
-      className="text-xs text-red-400/60 hover:text-red-400 transition-colors"
-    >
-      Delete
-    </button>
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="text-xs text-red-400/60 hover:text-red-400 transition-colors"
+      >
+        Delete
+      </button>
+      {open && (
+        <ConfirmModal
+          title="Delete case"
+          message={`Are you sure you want to delete "${caseName}"? This cannot be undone.`}
+          onConfirm={handleDelete}
+          onCancel={() => setOpen(false)}
+          loading={loading}
+        />
+      )}
+    </>
   )
 }

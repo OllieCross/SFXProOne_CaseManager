@@ -17,10 +17,9 @@ type Case = {
 type Props = {
   cases: Case[]
   canEdit: boolean
-  isAdmin: boolean
 }
 
-export default function InventoryList({ cases, canEdit, isAdmin }: Props) {
+export default function InventoryList({ cases, canEdit }: Props) {
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(() => {
@@ -77,7 +76,7 @@ export default function InventoryList({ cases, canEdit, isAdmin }: Props) {
                   </ul>
                 )}
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center justify-end gap-2 w-32 shrink-0">
                 <Link
                   href={`/case/${c.id}`}
                   className="text-muted hover:text-foreground text-xs transition-colors"
@@ -92,7 +91,7 @@ export default function InventoryList({ cases, canEdit, isAdmin }: Props) {
                     Edit
                   </Link>
                 )}
-                {isAdmin && <DeleteCaseButton caseId={c.id} caseName={c.name} />}
+                {canEdit && <DeleteCaseButton caseId={c.id} caseName={c.name} />}
               </div>
             </div>
           ))}

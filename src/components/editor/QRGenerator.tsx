@@ -7,8 +7,19 @@ const QR_SIZE = 1024
 const FOOTER_HEIGHT = 120
 const CANVAS_WIDTH = QR_SIZE
 const CANVAS_HEIGHT = QR_SIZE + FOOTER_HEIGHT
-const FONT_SIZE = 52
+const TEXT_PADDING = 60 // px of horizontal padding on each side
+const MAX_FONT_SIZE = 80
 const RANDOM_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+function fitFontSize(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxSize: number): number {
+  let size = maxSize
+  ctx.font = `bold ${size}px "Helvetica Neue", Helvetica, Arial, sans-serif`
+  while (ctx.measureText(text).width > maxWidth && size > 10) {
+    size -= 1
+    ctx.font = `bold ${size}px "Helvetica Neue", Helvetica, Arial, sans-serif`
+  }
+  return size
+}
 
 function randomString(length = 20) {
   let result = ''
@@ -52,11 +63,11 @@ export default function QRGenerator() {
 
     ctx.drawImage(qrCanvas, 0, 0)
 
-    // Footer text centered below the QR
+    // Footer text - fit to canvas width with padding
     ctx.fillStyle = '#000000'
-    ctx.font = `bold ${FONT_SIZE}px "Helvetica Neue", Helvetica, Arial, sans-serif`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
+    fitFontSize(ctx, value, CANVAS_WIDTH - TEXT_PADDING * 2, MAX_FONT_SIZE)
     ctx.fillText(value, CANVAS_WIDTH / 2, QR_SIZE + FOOTER_HEIGHT / 2)
 
     setGenerated(true)

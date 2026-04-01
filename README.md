@@ -125,17 +125,17 @@ This project relies on **Authentik** via NextAuth. Ensure that your Authentik in
 - [x] add new case tab doesnt allow uploading photos and PDFs
 - [x] iphone footer under home button
 - [x] Camelcase enums in DB
-- [ ] After Move The selected case appears on an another item in the case
+- [x] After Move The selected case appears on an another item in the case
 - [ ] Itemy - servisne kontroly a revizie - LOGBOOK
-- [ ] Bigger or drag/Drop buttons items sort
+- [x] Bigger or drag/Drop buttons items sort
 - [ ] Items without QR codes - prechody, flase, zabradlie
 - [ ] Groups & Bundles ? zabradlie, balik svetla, balik rezia
 - [ ] After save changes the case page shows old version of the edited case
 - [ ] does Minio delete files after removing from case ?
 - [ ] fixtures/machines granularity
-- [ ] Bigger QR code sticker font
-- [ ] new update popup or snackbar
-- [ ] photo/item/document delete confirmation
+- [x] Bigger QR code sticker font
+- [x] new update popup or snackbar
+- [x] photo/item/document delete confirmation
 - [ ] all passwords regenerate
 - [x] Edit button in case details
 - [ ] Dockerfile optimizations
@@ -147,7 +147,7 @@ This project relies on **Authentik** via NextAuth. Ensure that your Authentik in
 - [ ] profile with password changer
 - [ ] Events organisation system
 - [ ] /events - create/edit - past/future - date/location/time/contact/users/inventory/comment
-- [ ] /events topovanie dnešného eventu
+- [ ] /events topovanie dnešného alebo zajtrajšieho eventu
 - [ ] Event inventory PDF generator
 - [ ] rebrand to "Inventory Manager"
 - [ ] UAT Testing
