@@ -34,12 +34,12 @@ export default function Header() {
         <Link href="/scan" className="flex items-center gap-2.5 shrink-0">
           <Image
             src="/logo.jpg"
-            alt="SFXProOne"
+            alt="Inventory Manager"
             width={28}
             height={28}
             className="rounded-md"
           />
-          <span className="font-bold text-sm hidden sm:block">CaseManager</span>
+          <span className="font-bold text-sm hidden sm:block">Inventory Manager</span>
         </Link>
 
         {/* Nav */}

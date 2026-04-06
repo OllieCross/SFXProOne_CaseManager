@@ -30,7 +30,6 @@ export default async function InventoryPage() {
 
   const role = session.user.role
   const canEdit = ['EDITOR', 'ADMIN'].includes(role)
-  const isAdmin = role === 'ADMIN'
 
   return (
     <>
@@ -41,7 +40,7 @@ export default async function InventoryPage() {
         consumables={consumables}
         standaloneItems={standaloneItems}
         canEdit={canEdit}
-        isAdmin={isAdmin}
+        isAdmin={role === 'ADMIN'}
       />
     </>
   )

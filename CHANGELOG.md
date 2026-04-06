@@ -4,6 +4,22 @@ All notable changes to SFXProOne CaseManager are documented here.
 
 ---
 
+## v1.1.3 - 2026-04-07
+
+### Changed
+
+- **Rebranded to "Inventory Manager"**: all visible frontend labels updated (page title, header, login page, PWA manifest name/short_name); backend, container names, and infrastructure unchanged
+- **Inventory tab button labels**: create buttons now read `+ Case`, `+ Item`, `+ Device`, `+ Consumable` (removed the word "New")
+- **Section renames in Inventory tab**: "Devices" renamed to "Devices outside Cases"; "Standalone Items" renamed to "Items outside Cases"
+- **Edit/Delete removed from inventory list rows**: all four inventory sections (Cases, Devices, Consumables, Items outside Cases) now show only a blue "View" button per row; edit and delete actions are accessed from the detail/edit page
+- **Events list: end date removed**: event cards now show only start date and time; end date display removed entirely from the list
+- **Events list: inventory counts removed, crew names surfaced**: the per-event item/case/device count chips are gone; assigned crew members are now shown as individual pills (name badges) on each event card
+- **Event details: "Stagehands" renamed to "Crew"**: section heading and all references updated; email addresses removed from the crew member list
+- **Event details: "Back to Events" button removed**: navigation handled by the header
+- **Events list: upcoming events highlighted**: events where the logged-in user is assigned as crew and the start date is today or tomorrow are sorted to the top of the list and given a glowing white 1px border
+
+---
+
 ## v1.1.2 - 2026-04-07
 
 ### Fixed

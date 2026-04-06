@@ -50,7 +50,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   const event = await prisma.event.findUnique({
     where: { id },
     include: {
-      stagehands: { include: { user: { select: { id: true, name: true, email: true } } } },
+      stagehands: { include: { user: { select: { id: true, name: true } } } },
       cases: { include: { case: { select: { id: true, name: true, qrdata: true } } } },
       devices: { include: { device: { select: { id: true, name: true, status: true } } } },
       items: { include: { item: { select: { id: true, name: true, quantity: true, comment: true } } } },
@@ -91,15 +91,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           {event.comments && <InfoRow label="Notes" value={event.comments} />}
         </div>
 
-        {/* Stagehands */}
+        {/* Crew */}
         {event.stagehands.length > 0 && (
           <section className="space-y-2">
-            <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Stagehands ({event.stagehands.length})</h2>
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Crew ({event.stagehands.length})</h2>
             <div className="space-y-1">
               {event.stagehands.map(({ user }) => (
                 <div key={user.id} className="card py-2 px-3">
                   <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-muted">{user.email}</p>
                 </div>
               ))}
             </div>
@@ -172,11 +171,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           </section>
         )}
 
-        <div className="pt-2">
-          <Link href="/events" className="text-sm text-muted hover:text-foreground transition-colors">
-            Back to Events
-          </Link>
-        </div>
       </main>
     </>
   )

@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import QRGenerator from '@/components/editor/QRGenerator'
-import DeleteCaseButton from '@/components/editor/DeleteCaseButton'
 
 const STATUS_LABELS: Record<string, string> = {
   Working: 'Working', Faulty: 'Faulty', InRepair: 'In Repair',
@@ -37,9 +36,8 @@ type Props = {
   isAdmin: boolean
 }
 
-export default function InventoryPageClient({ cases, devices, consumables, standaloneItems, canEdit, isAdmin }: Props) {
+export default function InventoryPageClient({ cases, devices, consumables, standaloneItems, canEdit }: Props) {
   const [query, setQuery] = useState('')
-
   const q = query.trim().toLowerCase()
 
   const filteredCases = useMemo(() => {
@@ -58,12 +56,10 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
     q ? devices.filter((d) => d.name.toLowerCase().includes(q)) : devices,
     [devices, q]
   )
-
   const filteredConsumables = useMemo(() =>
     q ? consumables.filter((c) => c.name.toLowerCase().includes(q)) : consumables,
     [consumables, q]
   )
-
   const filteredItems = useMemo(() =>
     q ? standaloneItems.filter((i) => i.name.toLowerCase().includes(q)) : standaloneItems,
     [standaloneItems, q]
@@ -80,10 +76,10 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
 
       {canEdit && (
         <div className="flex items-center gap-2 flex-wrap">
-          <Link href="/editor/new" className="btn-primary text-sm">+ New Case</Link>
-          <Link href="/items/new" className="btn-primary text-sm">+ New Item</Link>
-          <Link href="/devices/new" className="btn-primary text-sm">+ New Device</Link>
-          <Link href="/consumables/new" className="btn-primary text-sm">+ New Consumable</Link>
+          <Link href="/editor/new" className="btn-primary text-sm">+ Case</Link>
+          <Link href="/items/new" className="btn-primary text-sm">+ Item</Link>
+          <Link href="/devices/new" className="btn-primary text-sm">+ Device</Link>
+          <Link href="/consumables/new" className="btn-primary text-sm">+ Consumable</Link>
         </div>
       )}
 
@@ -125,10 +121,8 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                     </ul>
                   )}
                 </div>
-                <div className="flex items-center justify-end gap-2 w-32 shrink-0">
-                  <Link href={`/case/${c.id}`} className="text-muted hover:text-foreground text-xs transition-colors">View</Link>
-                  {canEdit && <Link href={`/editor/${c.id}`} className="btn-primary text-xs py-1.5 px-3">Edit</Link>}
-                  {isAdmin && <DeleteCaseButton caseId={c.id} caseName={c.name} />}
+                <div className="shrink-0">
+                  <Link href={`/case/${c.id}`} className="btn-primary text-xs py-1.5 px-3">View</Link>
                 </div>
               </div>
             ))}
@@ -136,10 +130,10 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
         )}
       </section>
 
-      {/* Devices */}
+      {/* Devices outside Cases */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">
-          Devices <span className="normal-case font-normal">({filteredDevices.length})</span>
+          Devices outside Cases <span className="normal-case font-normal">({filteredDevices.length})</span>
         </h2>
         {filteredDevices.length === 0 ? (
           <p className="text-muted text-sm">{q ? 'No devices match.' : 'No devices yet.'}</p>
@@ -155,9 +149,8 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                   </p>
                   {d.case && <p className="text-muted text-xs mt-0.5">In: {d.case.name}</p>}
                 </div>
-                <div className="flex items-center justify-end gap-2 w-32 shrink-0">
-                  <Link href={`/devices/${d.id}`} className="text-muted hover:text-foreground text-xs transition-colors">View</Link>
-                  {canEdit && <Link href={`/devices/${d.id}/edit`} className="btn-primary text-xs py-1.5 px-3">Edit</Link>}
+                <div className="shrink-0">
+                  <Link href={`/devices/${d.id}`} className="btn-primary text-xs py-1.5 px-3">View</Link>
                 </div>
               </div>
             ))}
@@ -182,24 +175,22 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                     {c.stockQuantity} {c.unit} in stock{c.notes && <> &middot; {c.notes}</>}
                   </p>
                 </div>
-                {canEdit && (
-                  <div className="flex items-center justify-end gap-2 w-20 shrink-0">
-                    <Link href={`/consumables/${c.id}/edit`} className="btn-primary text-xs py-1.5 px-3">Edit</Link>
-                  </div>
-                )}
+                <div className="shrink-0">
+                  <Link href={`/consumables/${c.id}/edit`} className="btn-primary text-xs py-1.5 px-3">View</Link>
+                </div>
               </div>
             ))}
           </div>
         )}
       </section>
 
-      {/* Standalone Items */}
+      {/* Items outside Cases */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">
-          Standalone Items <span className="normal-case font-normal">({filteredItems.length})</span>
+          Items outside Cases <span className="normal-case font-normal">({filteredItems.length})</span>
         </h2>
         {filteredItems.length === 0 ? (
-          <p className="text-muted text-sm">{q ? 'No items match.' : 'No standalone items yet.'}</p>
+          <p className="text-muted text-sm">{q ? 'No items match.' : 'No items outside cases yet.'}</p>
         ) : (
           <div className="space-y-2">
             {filteredItems.map((item) => (
@@ -210,11 +201,9 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                     Qty: {item.quantity}{item.comment ? ` - ${item.comment}` : ''}
                   </p>
                 </div>
-                {canEdit && (
-                  <div className="flex gap-2 shrink-0 w-20 justify-end">
-                    <Link href={`/items/${item.id}/edit`} className="btn-ghost text-sm px-3 py-1.5">Edit</Link>
-                  </div>
-                )}
+                <div className="shrink-0">
+                  <Link href={`/items/${item.id}/edit`} className="btn-primary text-xs py-1.5 px-3">View</Link>
+                </div>
               </div>
             ))}
           </div>

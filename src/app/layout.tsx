@@ -5,7 +5,7 @@ import UpdateSnackbar from '@/components/ui/UpdateSnackbar'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SFXProOne CaseManager',
+  title: 'Inventory Manager',
   description: 'Flight case inventory and QR code management',
   manifest: '/manifest.json',
   icons: {
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'CaseManager',
+    title: 'Inventory Manager',
     startupImage: '/apple-touch-icon.png',
   },
 }

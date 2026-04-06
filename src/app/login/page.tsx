@@ -39,7 +39,7 @@ export default function LoginPage() {
         <div className="flex justify-center mb-8">
           <Image
             src="/logo.jpg"
-            alt="SFXProOne"
+            alt="Inventory Manager"
             width={250}
             height={250}
             className="rounded-xl"
@@ -47,7 +47,7 @@ export default function LoginPage() {
           />
         </div>
 
-        <h1 className="text-2xl font-bold text-center mb-1">CaseManager</h1>
+        <h1 className="text-2xl font-bold text-center mb-1">Inventory Manager</h1>
         <p className="text-muted text-sm text-center mb-8">Sign in to continue</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
