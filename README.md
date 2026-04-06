@@ -26,7 +26,7 @@ The app supports QR code scanning (including legacy Google Keep QR codes), direc
 
 - **Inventory Management:** Track cases, individual devices, generic accessories (items), and consumable stock. Each entity supports photos, PDFs, and rich metadata.
 - **Device Logbook:** Per-device maintenance and status history with timestamped entries (e.g. "Prism replaced", "Faulty discharge lamp").
-- **Consumables Stock:** Track quantities of expendable materials (confetti, pyro cartridges, CO₂). Stock is decremented automatically when an event completes.
+- **Consumables Stock:** Track quantities of expendable materials (confetti, pyro cartridges, CO2). Stock is decremented automatically when an event completes.
 - **Reusable Groups (Templates):** Bundle cases, devices, items, and consumables into named group templates (e.g. "Small Lights Package") to speed up event creation.
 - **Event Management:** Create and manage real-world jobs/shows with full inventory assignment, stagehand crew lists, client contact info, and invoice status tracking.
 - **QR Code Scanning:** Camera-based scanner with manual fallback. Handles both raw string QR codes (new stickers) and legacy Google Keep URLs stored on existing cases.
@@ -138,7 +138,7 @@ The app supports QR code scanning (including legacy Google Keep QR codes), direc
 | `Case` | Physical flight case with QR code, warehouse location, items, devices, photos, and PDFs |
 | `Device` | Single identifiable piece of equipment with status, serial number, logbook, photos, and PDFs |
 | `Item` | Generic reusable accessory (cables, clamps, adapters); can be inside a case or standalone |
-| `Consumable` | Expendable stock item (confetti, pyro, CO₂); stock decremented after events |
+| `Consumable` | Expendable stock item (confetti, pyro, CO2); stock decremented after events |
 | `Group` | Reusable template bundling cases, devices, items, and consumables |
 | `Event` | Real-world job/show with inventory assignment, stagehand crew, client info, and invoice status |
 | `LogbookEntry` | Per-device maintenance entry (date, comment, user) |

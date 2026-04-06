@@ -4,6 +4,42 @@ All notable changes to SFXProOne CaseManager are documented here.
 
 ---
 
+## v1.1.1 - 2026-04-06
+
+### Security
+
+- **IDOR fix - logbook entry deletion**: DELETE `/api/devices/[id]/logbook/[entryId]` now verifies the entry belongs to the device in the URL path before deleting; previously any authenticated editor could delete any logbook entry by ID
+- **XSS fix - changelog markdown rendering**: `marked()` output is now sanitised with `isomorphic-dompurify` before being passed to `dangerouslySetInnerHTML`; added `isomorphic-dompurify` dependency
+- **PostgreSQL port hardened**: Docker Compose postgres port binding changed from `0.0.0.0:5432` to `127.0.0.1:5432` so the database is no longer reachable from outside the host
+- **Rate limiter no longer fails open**: Redis `catch` block now falls back to an in-memory sliding-window counter (per-key `Map` with TTL) instead of unconditionally allowing all requests when Redis is unavailable
+- **Item DELETE existence check**: `/api/items/[id]` DELETE handler now returns 404 when the item does not exist instead of surfacing a raw Prisma error
+- **Item move - target case validation**: `/api/cases/[id]/items/[itemId]/move` PATCH now verifies the target case exists before updating; prevents foreign-key errors leaking to the client
+- **Consumable DELETE existence check**: `/api/consumables/[id]` DELETE handler now returns 404 when the consumable does not exist
+- **Authenticated version endpoint**: `/api/version` now requires a valid session; response is cached at module level to avoid a filesystem read on every request
+- **MinIO CORS headers restricted**: Traefik `accesscontrolallowheaders` for MinIO changed from wildcard `*` to an explicit list (`Content-Type`, `Authorization`, `X-Amz-Date`, `X-Amz-Content-Sha256`, `X-Amz-Security-Token`)
+- **Rate limiting on write endpoints**: `checkRateLimit` added to POST handlers for `/api/cases`, `/api/devices`, and `/api/events` (30 requests / 60 s per user)
+- **Presigned URL extension derived from MIME type**: file extension in the MinIO object key is now taken from a validated `MIME_TO_EXT` map instead of the user-supplied filename, preventing extension/MIME mismatch
+- **Dependency overrides**: `defu` forced to `>=6.1.5` (prototype pollution fix) and `effect` forced to `>=3.20.0` (AsyncLocalStorage context leak fix) via npm `overrides`
+
+### Infrastructure
+
+- Backup system documented below (three dedicated containers: `postgres-backup`, `redis-backup`, `minio-backup`)
+
+#### Backup containers
+
+| Container | Image | Schedule | Retention | Output volume |
+|-----------|-------|----------|-----------|---------------|
+| `sfxproone-postgres-backup` | `postgres:17-alpine` | Daily at 02:00 (via `sleep 86400` loop) | 7 days | `sfxproone_postgres_backups` |
+| `sfxproone-redis-backup` | `offen/docker-volume-backup:v2` | `0 2 * * *` | 7 days | `sfxproone_redis_backups` |
+| `sfxproone-minio-backup` | `offen/docker-volume-backup:v2` | `0 2 * * *` | 7 days | `sfxproone_minio_backups` |
+
+- **postgres-backup**: runs `pg_dump | gzip` against the `postgres` service, writes compressed `.sql.gz` files to `/backups`, prunes files older than 7 days via `find -mtime +7 -delete`; depends on `postgres` being healthy
+- **redis-backup**: mounts `redis_data` read-only, archives the volume to `sfxproone_redis_backups` nightly, retains 7 days of archives
+- **minio-backup**: mounts `minio_data` read-only, archives the volume to `sfxproone_minio_backups` nightly, retains 7 days of archives
+- All backup containers run on the `internal` network only; no external exposure
+
+---
+
 ## v1.1.0 - 2026-04-01
 
 ### Added

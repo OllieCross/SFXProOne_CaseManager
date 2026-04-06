@@ -30,6 +30,11 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
+  const targetCase = await prisma.case.findUnique({ where: { id: targetCaseId } })
+  if (!targetCase) {
+    return NextResponse.json({ error: 'Target case not found' }, { status: 404 })
+  }
+
   const updated = await prisma.item.update({
     where: { id: itemId },
     data: { caseId: targetCaseId },

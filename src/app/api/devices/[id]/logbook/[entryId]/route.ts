@@ -11,7 +11,13 @@ export async function DELETE(_req: Request, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { entryId } = await params
+  const { id, entryId } = await params
+
+  const entry = await prisma.logbookEntry.findUnique({ where: { id: entryId } })
+  if (!entry || entry.deviceId !== id) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
   await prisma.logbookEntry.delete({ where: { id: entryId } })
 
   return NextResponse.json({ ok: true })

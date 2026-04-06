@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { logAudit } from '@/lib/audit'
+import { checkRateLimit } from '@/lib/rateLimit'
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
@@ -35,6 +36,9 @@ export async function POST(req: Request) {
   if (!['EDITOR', 'ADMIN'].includes(session.user.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
+
+  const { allowed } = await checkRateLimit(`create:${session.user.id}`, 30, 60)
+  if (!allowed) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 
   const body = await req.json()
   const parsed = createSchema.safeParse(body)

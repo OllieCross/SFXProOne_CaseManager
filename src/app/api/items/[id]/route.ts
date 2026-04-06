@@ -35,6 +35,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   }
 
   const { id } = await params
+
+  const item = await prisma.item.findUnique({ where: { id } })
+  if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
   await prisma.item.delete({ where: { id } })
   return NextResponse.json({ ok: true })
 }

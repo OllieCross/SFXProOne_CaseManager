@@ -33,7 +33,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -88,9 +88,63 @@ services:
       - "traefik.docker.network=proxy"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolalloworiginlist=https://sfxproone.olliecross.com"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowmethods=GET,PUT,HEAD,OPTIONS"
-      - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.minio-cors.headers.accesscontrolallowheaders=Content-Type,Authorization,X-Amz-Date,X-Amz-Content-Sha256,X-Amz-Security-Token"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolexposeheaders=ETag"
       - "traefik.http.middlewares.minio-cors.headers.accesscontrolmaxage=3600"
+
+  postgres-backup:
+    image: postgres:17-alpine
+    container_name: sfxproone-postgres-backup
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    entrypoint: >
+      sh -c "
+        while true; do
+          PGPASSWORD=$$POSTGRES_PASSWORD pg_dump -h postgres -U $$POSTGRES_USER $$POSTGRES_DB | gzip > /backups/postgres_$$(date +%Y%m%d_%H%M%S).sql.gz &&
+          find /backups -name 'postgres_*.sql.gz' -mtime +7 -delete;
+          sleep 86400;
+        done
+      "
+    volumes:
+      - postgres_backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
+  redis-backup:
+    image: offen/docker-volume-backup:v2
+    container_name: sfxproone-redis-backup
+    restart: unless-stopped
+    environment:
+      BACKUP_CRON_EXPRESSION: "0 2 * * *"
+      BACKUP_RETENTION_DAYS: "7"
+      BACKUP_FILENAME: "redis-backup-%Y-%m-%dT%H-%M-%S.tar.gz"
+    volumes:
+      - redis_data:/backup/redis_data:ro
+      - redis_backups:/archive
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - internal
+
+  minio-backup:
+    image: offen/docker-volume-backup:v2
+    container_name: sfxproone-minio-backup
+    restart: unless-stopped
+    environment:
+      BACKUP_CRON_EXPRESSION: "0 2 * * *"
+      BACKUP_RETENTION_DAYS: "7"
+      BACKUP_FILENAME: "minio-backup-%Y-%m-%dT%H-%M-%S.tar.gz"
+    volumes:
+      - minio_data:/backup/minio_data:ro
+      - minio_backups:/archive
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - internal
 
 volumes:
   postgres_data:
@@ -102,6 +156,12 @@ volumes:
   minio_data:
     name: sfxproone_minio_data
     external: true
+  postgres_backups:
+    name: sfxproone_postgres_backups
+  redis_backups:
+    name: sfxproone_redis_backups
+  minio_backups:
+    name: sfxproone_minio_backups
 
 networks:
   internal:

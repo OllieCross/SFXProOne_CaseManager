@@ -26,6 +26,15 @@ const schema = z.union([
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
 const ALLOWED_DOC_TYPES = ['application/pdf']
 
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
+  'application/pdf': 'pdf',
+}
+
 export async function POST(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -55,7 +64,7 @@ export async function POST(req: Request) {
 
   await ensureBucket()
 
-  const ext = fileName.split('.').pop() ?? ''
+  const ext = MIME_TO_EXT[mimeType] ?? ''
   const fileKey = `${type}s/${ownerPrefix}/${ownerId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
   const command = new PutObjectCommand({

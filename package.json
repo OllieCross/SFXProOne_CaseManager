@@ -27,6 +27,7 @@
     "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
     "heic2any": "^0.0.4",
+    "isomorphic-dompurify": "^2.16.0",
     "html5-qrcode": "^2.3.8",
     "ioredis": "^5.4.1",
     "marked": "^17.0.5",
@@ -38,6 +39,10 @@
     "react-dom": "^18",
     "tailwind-merge": "^2.5.2",
     "zod": "^3.23.8"
+  },
+  "overrides": {
+    "defu": ">=6.1.5",
+    "effect": ">=3.20.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
