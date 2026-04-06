@@ -11,6 +11,8 @@ type Props = {
     name: string
     unit: string
     stockQuantity: number
+    warningThreshold: number | null
+    criticalThreshold: number | null
     notes: string
   }
 }
@@ -21,6 +23,12 @@ export default function ConsumableForm({ mode, consumableId, initialData }: Prop
   const [name, setName] = useState(initialData?.name ?? '')
   const [unit, setUnit] = useState(initialData?.unit ?? '')
   const [stockQuantity, setStockQuantity] = useState(initialData?.stockQuantity ?? 0)
+  const [warningThreshold, setWarningThreshold] = useState<string>(
+    initialData?.warningThreshold != null ? String(initialData.warningThreshold) : ''
+  )
+  const [criticalThreshold, setCriticalThreshold] = useState<string>(
+    initialData?.criticalThreshold != null ? String(initialData.criticalThreshold) : ''
+  )
   const [notes, setNotes] = useState(initialData?.notes ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -33,7 +41,14 @@ export default function ConsumableForm({ mode, consumableId, initialData }: Prop
     setError('')
 
     try {
-      const body = { name, unit, stockQuantity, notes: notes || undefined }
+      const body = {
+        name,
+        unit,
+        stockQuantity,
+        warningThreshold: warningThreshold !== '' ? parseFloat(warningThreshold) : null,
+        criticalThreshold: criticalThreshold !== '' ? parseFloat(criticalThreshold) : null,
+        notes: notes || undefined,
+      }
 
       const res = mode === 'create'
         ? await fetch('/api/consumables', {
@@ -122,6 +137,35 @@ export default function ConsumableForm({ mode, consumableId, initialData }: Prop
               value={stockQuantity}
               onChange={(e) => setStockQuantity(parseFloat(e.target.value) || 0)}
             />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Warning threshold</label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              className="input-field"
+              placeholder="Optional"
+              value={warningThreshold}
+              onChange={(e) => setWarningThreshold(e.target.value)}
+            />
+            <p className="text-xs text-muted mt-1">Stock at or below this turns yellow</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Critical threshold</label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              className="input-field"
+              placeholder="Optional"
+              value={criticalThreshold}
+              onChange={(e) => setCriticalThreshold(e.target.value)}
+            />
+            <p className="text-xs text-muted mt-1">Stock at or below this turns red</p>
           </div>
         </div>
 

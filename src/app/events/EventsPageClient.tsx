@@ -100,7 +100,7 @@ export default function EventsPageClient({ events, canEdit, userId, todayISO, to
                 {event.stagehands.map((s) => (
                   <span
                     key={s.userId}
-                    className="text-xs bg-white/10 text-foreground/80 px-2 py-0.5 rounded-full"
+                    className="text-xs bg-foreground/10 text-foreground/80 px-2 py-0.5 rounded-full"
                   >
                     {s.userName}
                   </span>

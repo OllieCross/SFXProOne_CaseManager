@@ -199,7 +199,7 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
                 key={t}
                 type="button"
                 onClick={() => { setAddType(t); setAddId('') }}
-                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${addType === t ? 'border-brand text-brand' : 'border-white/10 text-muted hover:text-foreground'}`}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${addType === t ? 'border-brand text-brand' : 'border-foreground/10 text-muted hover:text-foreground'}`}
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
               </button>

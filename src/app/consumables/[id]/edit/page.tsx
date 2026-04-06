@@ -25,6 +25,8 @@ export default async function EditConsumablePage({ params }: { params: Promise<{
             name: consumable.name,
             unit: consumable.unit,
             stockQuantity: consumable.stockQuantity,
+            warningThreshold: consumable.warningThreshold,
+            criticalThreshold: consumable.criticalThreshold,
             notes: consumable.notes ?? '',
           }}
         />

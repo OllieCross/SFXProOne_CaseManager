@@ -31,7 +31,7 @@ export default function CaseGallery({ images }: Props) {
           <button
             key={i}
             onClick={() => setSelected(i)}
-            className="aspect-square rounded-lg overflow-hidden bg-surface border border-white/10 hover:border-brand transition-colors"
+            className="aspect-square rounded-lg overflow-hidden bg-surface border border-foreground/10 hover:border-brand transition-colors"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img.url} alt={img.fileName} className="w-full h-full object-cover" />

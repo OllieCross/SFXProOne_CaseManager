@@ -62,7 +62,7 @@ export default function RoleSelector({ userId, currentRole, isSelf }: RoleSelect
         value={role}
         disabled={saving}
         onChange={(e) => handleChange(e.target.value as Role)}
-        className="bg-[#1e1e1e] border border-white/10 text-sm rounded px-2 py-1 text-white disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-[#1576bf]"
+        className="bg-[#1e1e1e] border border-foreground/10 text-sm rounded px-2 py-1 text-white disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-[#1576bf]"
       >
         {ROLE_OPTIONS.map((r) => (
           <option key={r} value={r}>

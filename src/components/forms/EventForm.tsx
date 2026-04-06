@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
 type MemberType = 'stagehand' | 'case' | 'device' | 'item' | 'consumable'
@@ -10,7 +10,15 @@ type CaseOption = { id: string; name: string }
 type DeviceOption = { id: string; name: string; status: string }
 type ItemOption = { id: string; name: string; quantity: number }
 type ConsumableOption = { id: string; name: string; unit: string }
-type GroupOption = { id: string; name: string }
+
+type GroupOption = {
+  id: string
+  name: string
+  cases: { case: CaseOption }[]
+  devices: { device: DeviceOption }[]
+  items: { item: ItemOption }[]
+  consumables: { consumable: ConsumableOption; quantityNeeded: number }[]
+}
 
 type EventMember =
   | { type: 'stagehand'; id: string; name: string; email: string }
@@ -27,7 +35,7 @@ type Props = {
     venueName: string
     location: string
     startDate: string
-    endDate: string
+    clientName: string
     clientPhone: string
     clientEmail: string
     comments: string
@@ -60,10 +68,22 @@ const INVOICE_STATUS_LABELS: Record<string, string> = {
   DepositNotYetPaid: 'Deposit Not Yet Paid', NotPaidInFull: 'Not Paid in Full',
 }
 
-// Format datetime-local input value
-function toDatetimeLocal(iso: string) {
-  if (!iso) return ''
-  return iso.slice(0, 16)
+// Generate time options at 15-minute increments
+const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
+  const h = Math.floor(i / 4).toString().padStart(2, '0')
+  const m = ((i % 4) * 15).toString().padStart(2, '0')
+  return `${h}:${m}`
+})
+
+function splitDateTime(iso: string): { date: string; time: string } {
+  if (!iso) return { date: '', time: '09:00' }
+  const d = new Date(iso)
+  const date = d.toISOString().slice(0, 10)
+  const h = d.getHours().toString().padStart(2, '0')
+  const rawMin = d.getMinutes()
+  // Round down to nearest 15
+  const m = (Math.floor(rawMin / 15) * 15).toString().padStart(2, '0')
+  return { date, time: `${h}:${m}` }
 }
 
 export default function EventForm({
@@ -71,11 +91,14 @@ export default function EventForm({
 }: Props) {
   const router = useRouter()
 
+  const splitStart = splitDateTime(initialData?.startDate ?? '')
+
   const [name, setName] = useState(initialData?.name ?? '')
   const [venueName, setVenueName] = useState(initialData?.venueName ?? '')
   const [location, setLocation] = useState(initialData?.location ?? '')
-  const [startDate, setStartDate] = useState(toDatetimeLocal(initialData?.startDate ?? ''))
-  const [endDate, setEndDate] = useState(toDatetimeLocal(initialData?.endDate ?? ''))
+  const [startDateVal, setStartDateVal] = useState(splitStart.date)
+  const [startTimeVal, setStartTimeVal] = useState(splitStart.time)
+  const [clientName, setClientName] = useState(initialData?.clientName ?? '')
   const [clientPhone, setClientPhone] = useState(initialData?.clientPhone ?? '')
   const [clientEmail, setClientEmail] = useState(initialData?.clientEmail ?? '')
   const [comments, setComments] = useState(initialData?.comments ?? '')
@@ -83,11 +106,16 @@ export default function EventForm({
   const [invoiceStatus, setInvoiceStatus] = useState(initialData?.invoiceStatus ?? 'NotPaid')
   const [members, setMembers] = useState<EventMember[]>(initialData?.members ?? [])
 
-  // Add-member panel state
-  const [addType, setAddType] = useState<MemberType>('stagehand')
-  const [addId, setAddId] = useState('')
-  const [addQty, setAddQty] = useState(1)
+  // Crew picker
+  const [crewId, setCrewId] = useState('')
 
+  // Inventory picker
+  const [invType, setInvType] = useState<'case' | 'device' | 'item' | 'consumable'>('case')
+  const [invId, setInvId] = useState('')
+  const [invQty, setInvQty] = useState(1)
+  const [invSearch, setInvSearch] = useState('')
+
+  // Group picker
   const [groupId, setGroupId] = useState('')
   const [addingGroup, setAddingGroup] = useState(false)
 
@@ -109,38 +137,44 @@ export default function EventForm({
     })
   }
 
-  function addMember() {
-    if (!addId) return
-    if (isMember(addType, addId)) return
+  function addCrew() {
+    if (!crewId || isMember('stagehand', crewId)) return
+    const opt = allUsers.find((u) => u.id === crewId)
+    if (!opt) return
+    const member: EventMember = { type: 'stagehand', id: opt.id, name: opt.name, email: opt.email }
+    setMembers((prev) => [...prev, member])
+    if (mode === 'edit') patchMember('add', 'stagehand', crewId)
+    setCrewId('')
+  }
+
+  function addInventory() {
+    if (!invId) return
+    if (isMember(invType, invId)) return
 
     let member: EventMember
-
-    if (addType === 'stagehand') {
-      const opt = allUsers.find((u) => u.id === addId)
-      if (!opt) return
-      member = { type: 'stagehand', id: opt.id, name: opt.name, email: opt.email }
-    } else if (addType === 'case') {
-      const opt = allCases.find((c) => c.id === addId)
+    if (invType === 'case') {
+      const opt = allCases.find((c) => c.id === invId)
       if (!opt) return
       member = { type: 'case', id: opt.id, name: opt.name }
-    } else if (addType === 'device') {
-      const opt = allDevices.find((d) => d.id === addId)
+    } else if (invType === 'device') {
+      const opt = allDevices.find((d) => d.id === invId)
       if (!opt) return
       member = { type: 'device', id: opt.id, name: opt.name, status: opt.status }
-    } else if (addType === 'item') {
-      const opt = allItems.find((i) => i.id === addId)
+    } else if (invType === 'item') {
+      const opt = allItems.find((i) => i.id === invId)
       if (!opt) return
       member = { type: 'item', id: opt.id, name: opt.name, quantity: opt.quantity }
     } else {
-      const opt = allConsumables.find((c) => c.id === addId)
+      const opt = allConsumables.find((c) => c.id === invId)
       if (!opt) return
-      member = { type: 'consumable', id: opt.id, name: opt.name, unit: opt.unit, quantityNeeded: addQty }
+      member = { type: 'consumable', id: opt.id, name: opt.name, unit: opt.unit, quantityNeeded: invQty }
     }
 
     setMembers((prev) => [...prev, member])
-    if (mode === 'edit') patchMember('add', addType, addId, addType === 'consumable' ? addQty : undefined)
-    setAddId('')
-    setAddQty(1)
+    if (mode === 'edit') patchMember('add', invType, invId, invType === 'consumable' ? invQty : undefined)
+    setInvId('')
+    setInvQty(1)
+    setInvSearch('')
   }
 
   function removeMember(type: MemberType, id: string) {
@@ -148,8 +182,26 @@ export default function EventForm({
     if (mode === 'edit') patchMember('remove', type, id)
   }
 
+  function expandGroupLocally(gId: string) {
+    const group = allGroups.find((g) => g.id === gId)
+    if (!group) return
+    const toAdd: EventMember[] = [
+      ...group.cases.filter((x) => !isMember('case', x.case.id)).map((x) => ({ type: 'case' as const, id: x.case.id, name: x.case.name })),
+      ...group.devices.filter((x) => !isMember('device', x.device.id)).map((x) => ({ type: 'device' as const, id: x.device.id, name: x.device.name, status: x.device.status })),
+      ...group.items.filter((x) => !isMember('item', x.item.id)).map((x) => ({ type: 'item' as const, id: x.item.id, name: x.item.name, quantity: x.item.quantity })),
+      ...group.consumables.filter((x) => !isMember('consumable', x.consumable.id)).map((x) => ({ type: 'consumable' as const, id: x.consumable.id, name: x.consumable.name, unit: x.consumable.unit, quantityNeeded: x.quantityNeeded })),
+    ]
+    setMembers((prev) => [...prev, ...toAdd])
+  }
+
   async function handleAddGroup() {
-    if (!groupId || !eventId) return
+    if (!groupId) return
+    if (mode === 'create') {
+      expandGroupLocally(groupId)
+      setGroupId('')
+      return
+    }
+    if (!eventId) return
     setAddingGroup(true)
     try {
       const res = await fetch(`/api/events/${eventId}/add-group`, {
@@ -158,7 +210,6 @@ export default function EventForm({
         body: JSON.stringify({ groupId }),
       })
       if (!res.ok) throw new Error('Failed to add group')
-      // Reload page to get fresh members
       router.refresh()
       window.location.reload()
     } catch {
@@ -169,18 +220,41 @@ export default function EventForm({
     }
   }
 
+  // ---------- Filtered inventory options ----------
+
+  const invOptions = useMemo(() => {
+    const sq = invSearch.trim().toLowerCase()
+    let opts: { id: string; name: string; status?: string; unit?: string }[] = []
+    if (invType === 'case') opts = allCases.filter((c) => !isMember('case', c.id))
+    else if (invType === 'device') opts = allDevices.filter((d) => !isMember('device', d.id))
+    else if (invType === 'item') opts = allItems.filter((i) => !isMember('item', i.id))
+    else opts = allConsumables.filter((c) => !isMember('consumable', c.id))
+    if (sq) opts = opts.filter((o) => o.name.toLowerCase().includes(sq))
+    return opts
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invType, invSearch, members, allCases, allDevices, allItems, allConsumables])
+
+  const availableCrew = useMemo(
+    () => allUsers.filter((u) => !isMember('stagehand', u.id)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [members, allUsers]
+  )
+
   // ---------- Submit ----------
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!startDateVal || !startTimeVal) { setError('Start date and time are required'); return }
     setSaving(true)
     setError('')
+
+    const startDate = new Date(`${startDateVal}T${startTimeVal}:00`).toISOString()
 
     const payload = {
       name, venueName,
       location: location || undefined,
-      startDate: startDate ? new Date(startDate).toISOString() : undefined,
-      endDate: endDate ? new Date(endDate).toISOString() : undefined,
+      startDate,
+      clientName: clientName || undefined,
       clientPhone: clientPhone || undefined,
       clientEmail: clientEmail || undefined,
       comments: comments || undefined,
@@ -204,7 +278,6 @@ export default function EventForm({
         const created = await res.json()
         id = created.id
 
-        // Add all members
         await Promise.all(
           members.map((m) =>
             fetch(`/api/events/${id}/members`, {
@@ -239,16 +312,6 @@ export default function EventForm({
     }
   }
 
-  // ---------- Filtered options ----------
-
-  function availableOptions() {
-    if (addType === 'stagehand') return allUsers.filter((u) => !isMember('stagehand', u.id))
-    if (addType === 'case') return allCases.filter((c) => !isMember('case', c.id))
-    if (addType === 'device') return allDevices.filter((d) => !isMember('device', d.id))
-    if (addType === 'item') return allItems.filter((i) => !isMember('item', i.id))
-    return allConsumables.filter((c) => !isMember('consumable', c.id))
-  }
-
   const stagehands = members.filter((m): m is Extract<EventMember, { type: 'stagehand' }> => m.type === 'stagehand')
   const caseMembers = members.filter((m): m is Extract<EventMember, { type: 'case' }> => m.type === 'case')
   const deviceMembers = members.filter((m): m is Extract<EventMember, { type: 'device' }> => m.type === 'device')
@@ -263,35 +326,30 @@ export default function EventForm({
       {/* Details */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Details</h2>
-
         <div>
           <label className="block text-sm font-medium mb-1.5">Event Name *</label>
           <input type="text" required className="input-field" placeholder="e.g. New Year Gala 2027"
             value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-1.5">Venue Name *</label>
           <input type="text" required className="input-field" placeholder="e.g. Opera House Main Stage"
             value={venueName} onChange={(e) => setVenueName(e.target.value)} />
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-1.5">Location</label>
           <input type="text" className="input-field" placeholder="e.g. Vienna, Austria"
             value={location} onChange={(e) => setLocation(e.target.value)} />
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Start *</label>
-            <input type="datetime-local" required className="input-field"
-              value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">End *</label>
-            <input type="datetime-local" required className="input-field"
-              value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <div>
+          <label className="block text-sm font-medium mb-1.5">Start Date & Time *</label>
+          <div className="grid grid-cols-2 gap-3">
+            <input type="date" required className="input-field" value={startDateVal} onChange={(e) => setStartDateVal(e.target.value)} />
+            <select className="input-field" value={startTimeVal} onChange={(e) => setStartTimeVal(e.target.value)}>
+              {TIME_OPTIONS.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
           </div>
         </div>
       </section>
@@ -299,13 +357,16 @@ export default function EventForm({
       {/* Client */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Client</h2>
-
+        <div>
+          <label className="block text-sm font-medium mb-1.5">Client Name</label>
+          <input type="text" className="input-field" placeholder="e.g. Acme Corp"
+            value={clientName} onChange={(e) => setClientName(e.target.value)} />
+        </div>
         <div>
           <label className="block text-sm font-medium mb-1.5">Phone</label>
           <input type="tel" className="input-field" placeholder="+43 123 456 789"
             value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-1.5">Email</label>
           <input type="email" className="input-field" placeholder="client@example.com"
@@ -316,7 +377,6 @@ export default function EventForm({
       {/* Status */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Status</h2>
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1.5">Event Status</label>
@@ -335,7 +395,6 @@ export default function EventForm({
             </select>
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium mb-1.5">Comments / Notes</label>
           <textarea rows={3} className="input-field resize-none" placeholder="Internal notes..."
@@ -343,8 +402,31 @@ export default function EventForm({
         </div>
       </section>
 
-      {/* Add Group (edit mode only) */}
-      {mode === 'edit' && allGroups.length > 0 && (
+      {/* Crew */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Crew</h2>
+        <div className="card flex gap-2">
+          <select className="input-field flex-1" value={crewId} onChange={(e) => setCrewId(e.target.value)}>
+            <option value="">-- Select crew member --</option>
+            {availableCrew.map((u) => (
+              <option key={u.id} value={u.id}>{u.name}</option>
+            ))}
+          </select>
+          <button type="button" onClick={addCrew} disabled={!crewId} className="btn-primary text-sm shrink-0">
+            Add
+          </button>
+        </div>
+        {stagehands.length > 0 && (
+          <div className="space-y-1">
+            {stagehands.map((m) => (
+              <MemberRow key={m.id} label={m.name} onRemove={() => removeMember('stagehand', m.id)} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Add Group Template */}
+      {allGroups.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Add Group Template</h2>
           <div className="card flex gap-2">
@@ -363,117 +445,99 @@ export default function EventForm({
               {addingGroup ? 'Adding...' : 'Add Group'}
             </button>
           </div>
+          <p className="text-xs text-muted">Expands the group&apos;s cases, devices, items, and consumables into the inventory below.</p>
         </section>
       )}
 
-      {/* Add member panel */}
+      {/* Inventory */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">
-          {mode === 'edit' ? 'Add Inventory / Crew' : 'Inventory & Crew'}
-        </h2>
+        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Inventory</h2>
         <div className="card space-y-3">
+          {/* Type tabs */}
           <div className="flex gap-2 flex-wrap">
-            {(['stagehand', 'case', 'device', 'item', 'consumable'] as MemberType[]).map((t) => (
+            {(['case', 'device', 'item', 'consumable'] as const).map((t) => (
               <button
                 key={t}
                 type="button"
-                onClick={() => { setAddType(t); setAddId('') }}
-                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${addType === t ? 'border-brand text-brand' : 'border-white/10 text-muted hover:text-foreground'}`}
+                onClick={() => { setInvType(t); setInvId(''); setInvSearch('') }}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${invType === t ? 'border-brand text-brand' : 'border-foreground/10 text-muted hover:text-foreground'}`}
               >
-                {t === 'stagehand' ? 'Stagehand' : t.charAt(0).toUpperCase() + t.slice(1)}
+                {t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
             ))}
           </div>
 
+          {/* Search */}
+          <input
+            type="search"
+            placeholder={`Search ${invType}s...`}
+            className="input-field"
+            value={invSearch}
+            onChange={(e) => { setInvSearch(e.target.value); setInvId('') }}
+          />
+
+          {/* Picker row */}
           <div className="flex gap-2">
-            <select className="input-field flex-1" value={addId} onChange={(e) => setAddId(e.target.value)}>
-              <option value="">-- Select {addType} --</option>
-              {(availableOptions() as Array<{ id: string; name: string; status?: string; email?: string }>).map((opt) => (
+            <select className="input-field flex-1" value={invId} onChange={(e) => setInvId(e.target.value)}>
+              <option value="">-- Select {invType} --</option>
+              {(invOptions as Array<{ id: string; name: string; status?: string; unit?: string }>).map((opt) => (
                 <option key={opt.id} value={opt.id}>
                   {opt.name}
-                  {opt.email ? ` (${opt.email})` : ''}
                   {opt.status ? ` (${STATUS_LABELS[opt.status] ?? opt.status})` : ''}
+                  {opt.unit ? ` (${opt.unit})` : ''}
                 </option>
               ))}
             </select>
-
-            {addType === 'consumable' && (
+            {invType === 'consumable' && (
               <input
-                type="number"
-                min={0.01}
-                step="0.01"
-                className="input-field w-24"
-                placeholder="Qty"
-                value={addQty}
-                onChange={(e) => setAddQty(parseFloat(e.target.value) || 1)}
+                type="number" min={0.01} step="0.01" className="input-field w-24" placeholder="Qty"
+                value={invQty} onChange={(e) => setInvQty(parseFloat(e.target.value) || 1)}
               />
             )}
-
-            <button
-              type="button"
-              onClick={addMember}
-              disabled={!addId}
-              className="btn-primary text-sm shrink-0"
-            >
+            <button type="button" onClick={addInventory} disabled={!invId} className="btn-primary text-sm shrink-0">
               Add
             </button>
           </div>
         </div>
+
+        {/* Current inventory */}
+        {(caseMembers.length + deviceMembers.length + itemMembers.length + consumableMembers.length) > 0 && (
+          <div className="space-y-3">
+            {caseMembers.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs text-muted">Cases</p>
+                {caseMembers.map((m) => (
+                  <MemberRow key={m.id} label={m.name} onRemove={() => removeMember('case', m.id)} />
+                ))}
+              </div>
+            )}
+            {deviceMembers.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs text-muted">Devices</p>
+                {deviceMembers.map((m) => (
+                  <MemberRow key={m.id} label={`${m.name} (${STATUS_LABELS[m.status] ?? m.status})`} onRemove={() => removeMember('device', m.id)} />
+                ))}
+              </div>
+            )}
+            {itemMembers.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs text-muted">Items</p>
+                {itemMembers.map((m) => (
+                  <MemberRow key={m.id} label={`${m.name} (x${m.quantity})`} onRemove={() => removeMember('item', m.id)} />
+                ))}
+              </div>
+            )}
+            {consumableMembers.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs text-muted">Consumables</p>
+                {consumableMembers.map((m) => (
+                  <MemberRow key={m.id} label={`${m.name} - ${m.quantityNeeded} ${m.unit}`} onRemove={() => removeMember('consumable', m.id)} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </section>
-
-      {/* Current members */}
-      {members.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">
-            Crew & Inventory ({members.length})
-          </h2>
-
-          {stagehands.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-muted">Stagehands</p>
-              {stagehands.map((m) => (
-                <MemberRow key={m.id} label={`${m.name} (${m.email})`} onRemove={() => removeMember('stagehand', m.id)} />
-              ))}
-            </div>
-          )}
-
-          {caseMembers.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-muted">Cases</p>
-              {caseMembers.map((m) => (
-                <MemberRow key={m.id} label={m.name} onRemove={() => removeMember('case', m.id)} />
-              ))}
-            </div>
-          )}
-
-          {deviceMembers.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-muted">Devices</p>
-              {deviceMembers.map((m) => (
-                <MemberRow key={m.id} label={`${m.name} (${STATUS_LABELS[m.status] ?? m.status})`} onRemove={() => removeMember('device', m.id)} />
-              ))}
-            </div>
-          )}
-
-          {itemMembers.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-muted">Items</p>
-              {itemMembers.map((m) => (
-                <MemberRow key={m.id} label={`${m.name} (x${m.quantity})`} onRemove={() => removeMember('item', m.id)} />
-              ))}
-            </div>
-          )}
-
-          {consumableMembers.length > 0 && (
-            <div className="space-y-1">
-              <p className="text-xs text-muted">Consumables</p>
-              {consumableMembers.map((m) => (
-                <MemberRow key={m.id} label={`${m.name} - ${m.quantityNeeded} ${m.unit}`} onRemove={() => removeMember('consumable', m.id)} />
-              ))}
-            </div>
-          )}
-        </section>
-      )}
 
       {error && <p className="text-red-400 text-sm">{error}</p>}
 
@@ -491,11 +555,7 @@ function MemberRow({ label, onRemove }: { label: string; onRemove: () => void })
   return (
     <div className="card flex items-center justify-between gap-3 py-2 px-3">
       <span className="text-sm truncate">{label}</span>
-      <button
-        type="button"
-        onClick={onRemove}
-        className="text-red-400/60 hover:text-red-400 text-xs transition-colors shrink-0"
-      >
+      <button type="button" onClick={onRemove} className="text-red-400/60 hover:text-red-400 text-xs transition-colors shrink-0">
         Remove
       </button>
     </div>

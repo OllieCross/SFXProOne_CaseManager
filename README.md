@@ -1,4 +1,4 @@
-# SFXProOne Case Manager
+# Inventory Manager
 
 ![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
@@ -10,13 +10,9 @@
 ![Authentik](https://img.shields.io/badge/Authentik-FD4B2D?style=for-the-badge&logo=authentik&logoColor=white)
 ![Traefik](https://img.shields.io/badge/Traefik-24A1C1?style=for-the-badge&logo=traefik-proxy&logoColor=white)
 
-<div align="center">
-  <img src="logo.jpg" alt="SFXProOne Logo" width="500" />
-</div>
-
 ## Project Overview
 
-**SFXProOne Case Manager** is a comprehensive, full-stack inventory and event management application built for AV/SFX rental companies. It tracks flight cases, individual devices, consumables, reusable gear groups, and real-world events - all through a mobile-first web interface accessible from any phone or desktop browser.
+**Inventory Manager** is a comprehensive, full-stack inventory and event management application built for AV/SFX rental companies. It tracks flight cases, individual devices, consumables, reusable gear groups, and real-world events - all through a mobile-first web interface accessible from any phone or desktop browser.
 
 The app supports QR code scanning (including legacy Google Keep QR codes), direct file uploads to MinIO, role-based access control via Authentik SSO, and is deployed fully containerised behind Traefik with Let's Encrypt TLS.
 
@@ -157,7 +153,7 @@ The app supports QR code scanning (including legacy Google Keep QR codes), direc
 ## Directory Structure
 
 ```text
-SFXProOne_CaseManager/
+Inventory_Manager/
 ├── prisma/
 │   ├── schema.prisma        # Full data model (User, Case, Device, Item, Consumable, Group, Event, ...)
 │   ├── seed.ts              # Seeds admin user + sample cases
@@ -223,7 +219,7 @@ SFXProOne_CaseManager/
 
    ```bash
    git clone <repository-url>
-   cd SFXProOne_CaseManager
+   cd Inventory_Manager
    ```
 
 2. **Install dependencies:**
@@ -271,7 +267,7 @@ The app is deployed via Docker Compose. `entrypoint.sh` runs `prisma migrate dep
 
 ```bash
 # On the server
-cd /home/user/sfxproone
+cd /home/user/inventory_manager
 git pull
 docker compose build
 docker compose up -d
@@ -284,7 +280,7 @@ docker compose exec nextjs-app node node_modules/ts-node/dist/bin.js \
 ### Infrastructure (separate stacks)
 
 - **Traefik** (`srv/traefik/`) — edge router, TLS termination via Let's Encrypt ACME, security headers middleware.
-- **Authentik** (`srv/authentik/`) — OIDC/OAuth2 SSO provider. Groups `sfxproone-editors` and `sfxproone-admins` control role claims returned to NextAuth.
+- **Authentik** (`srv/authentik/`) — OIDC/OAuth2 SSO provider. Groups `editors` and `admins` control role claims returned to NextAuth.
 
 Both run on a shared `proxy` Docker network so Traefik can route to them.
 

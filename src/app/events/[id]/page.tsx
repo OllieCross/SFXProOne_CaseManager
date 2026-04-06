@@ -79,13 +79,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         {/* Info card */}
         <div className="card space-y-2">
           <InfoRow label="Start" value={formatDateTime(event.startDate)} />
-          <InfoRow label="End" value={formatDateTime(event.endDate)} />
           <InfoRow label="Status" value={
             <span className={STATUS_COLORS[event.status] ?? ''}>{EVENT_STATUS_LABELS[event.status] ?? event.status}</span>
           } />
           <InfoRow label="Invoice" value={
             <span className={INVOICE_COLORS[event.invoiceStatus] ?? ''}>{INVOICE_LABELS[event.invoiceStatus] ?? event.invoiceStatus}</span>
           } />
+          {event.clientName && <InfoRow label="Client" value={event.clientName} />}
           {event.clientPhone && <InfoRow label="Phone" value={event.clientPhone} />}
           {event.clientEmail && <InfoRow label="Email" value={event.clientEmail} />}
           {event.comments && <InfoRow label="Notes" value={event.comments} />}

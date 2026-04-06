@@ -157,7 +157,7 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
           {device.logbook.length === 0 ? (
             <p className="text-muted text-sm">No logbook entries yet.</p>
           ) : (
-            <div className="card divide-y divide-white/10">
+            <div className="card divide-y divide-foreground/10">
               {device.logbook.map((entry) => (
                 <div key={entry.id} className="py-3 first:pt-0 last:pb-0">
                   <p className="text-sm">{entry.comment}</p>

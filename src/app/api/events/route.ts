@@ -10,7 +10,7 @@ const createSchema = z.object({
   venueName: z.string().min(1).max(200),
   location: z.string().optional(),
   startDate: z.string().datetime(),
-  endDate: z.string().datetime(),
+  clientName: z.string().optional(),
   clientPhone: z.string().optional(),
   clientEmail: z.string().email().optional().or(z.literal('')),
   comments: z.string().optional(),
@@ -54,7 +54,6 @@ export async function POST(req: Request) {
     data: {
       ...rest,
       startDate: new Date(rest.startDate),
-      endDate: new Date(rest.endDate),
       clientEmail: clientEmail || null,
     },
   })

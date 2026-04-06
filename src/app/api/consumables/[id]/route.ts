@@ -8,6 +8,8 @@ const updateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   unit: z.string().min(1).max(50).optional(),
   stockQuantity: z.number().min(0).optional(),
+  warningThreshold: z.number().min(0).optional().nullable(),
+  criticalThreshold: z.number().min(0).optional().nullable(),
   notes: z.string().optional().nullable(),
 })
 

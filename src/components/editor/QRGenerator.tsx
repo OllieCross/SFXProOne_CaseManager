@@ -146,7 +146,7 @@ export default function QRGenerator() {
           </div>
 
           {/* Canvas - always mounted so the ref is stable across renders */}
-          <div className={`rounded-lg overflow-hidden border border-white/10 ${generated ? '' : 'hidden'}`}>
+          <div className={`rounded-lg overflow-hidden border border-foreground/10 ${generated ? '' : 'hidden'}`}>
             <canvas ref={canvasRef} className="w-full h-auto" />
           </div>
         </div>

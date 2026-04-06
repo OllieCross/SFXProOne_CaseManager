@@ -71,7 +71,7 @@ export default function ScanPage() {
 
         {/* Camera scanner */}
         {scannerVisible && status !== 'loading' && (
-          <div className="rounded-xl overflow-hidden border border-white/10">
+          <div className="rounded-xl overflow-hidden border border-foreground/10">
             <QRScanner onScan={handleScan} />
           </div>
         )}

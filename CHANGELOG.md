@@ -4,6 +4,49 @@ All notable changes to SFXProOne CaseManager are documented here.
 
 ---
 
+## v1.1.7 - 2026-04-07
+
+### Added
+
+- **Consumable warning/critical thresholds**: each consumable now has optional `warningThreshold` and `criticalThreshold` fields; set them on the create/edit form with inline help text
+- **Consumable stock status bar**: the inventory list replaces the plain quantity label with a horizontal fill bar per consumable - green when healthy, yellow at warning level, red at critical level with a `!` indicator; no thresholds set shows a neutral grey bar
+
+---
+
+## v1.1.6 - 2026-04-07
+
+### Added
+
+- **Light/dark system theme**: the app now follows the OS/browser color scheme preference automatically; no manual toggle is needed
+- **Light mode palette**: background `#f5f5f5`, surface `#ffffff`, foreground `#0a0a0a`; brand color and layout unchanged
+- **CSS variable tokens**: `background`, `surface`, `foreground`, and `muted` are now CSS variables so all components respond to theme changes without JavaScript
+
+---
+
+## v1.1.5 - 2026-04-07
+
+### Added
+
+- **User profile page (`/profile`)**: any logged-in user can update their display name and change their password; accessed by clicking the role badge in the header
+- **Admin: create user**: admins can create new user accounts directly from the Admin Panel via a "Create User" modal (name, email, role, password); duplicate email is rejected with a clear error
+- **Role badge links to profile**: the role pill in the top-right header is now a clickable link to `/profile`
+
+---
+
+## v1.1.4 - 2026-04-07
+
+### Changed
+
+- **Event model: `endDate` removed**: events now have a single start date/time; all API routes, forms, and detail pages updated
+- **Event model: `clientName` added**: new optional client name field available on create/edit forms and shown in the event detail view
+- **Event form: crew section above inventory**: the crew (stagehand) picker is now a distinct section above the inventory picker, with a clear visual separator
+- **Event form: items outside cases only**: the inventory picker no longer lists items that belong to a case; only standalone items (caseId IS NULL) are available to add directly to an event
+- **Event form: group picker in create mode**: the group template picker is now available on the event create form (previously only on edit); expanding a group populates the inventory fields locally without requiring a round-trip
+- **Event form: inventory search input**: a real-time search/filter input above the inventory picker filters across all inventory types (Cases, Devices, Items, Consumables) by name
+- **Event form: 15-minute start time steps**: the start time picker is now a date input + time select with 15-minute increments (00, 15, 30, 45) instead of a free-form datetime-local input
+
+---
+
 ## v1.1.3 - 2026-04-07
 
 ### Changed

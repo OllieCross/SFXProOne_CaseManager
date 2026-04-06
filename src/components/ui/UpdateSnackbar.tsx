@@ -49,7 +49,7 @@ export default function UpdateSnackbar() {
         <span>App updated to {version}</span>
         <button
           onClick={dismiss}
-          className="text-white/70 hover:text-white transition-colors text-xs leading-none"
+          className="text-foreground/70 hover:text-white transition-colors text-xs leading-none"
           aria-label="Dismiss"
         >
           &times;

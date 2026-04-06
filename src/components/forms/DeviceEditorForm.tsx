@@ -403,7 +403,7 @@ export default function DeviceEditorForm({ mode, deviceId, initialData, allCases
             </button>
           </div>
           {showScanner && (
-            <div className="mt-2 rounded-xl overflow-hidden border border-white/10">
+            <div className="mt-2 rounded-xl overflow-hidden border border-foreground/10">
               <QRScanner onScan={(result) => { setQrCode(result); setShowScanner(false) }} />
             </div>
           )}
@@ -472,7 +472,7 @@ export default function DeviceEditorForm({ mode, deviceId, initialData, allCases
         {pendingImages.length > 0 && (
           <div className="grid grid-cols-3 gap-2">
             {pendingImages.map((p, i) => (
-              <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-white/10 bg-surface">
+              <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-foreground/10 bg-surface">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={p.previewUrl} alt={p.file.name} className="w-full h-full object-cover opacity-60" />
                 <button type="button" onClick={() => removePendingImage(i)} className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-500/80 transition-colors" aria-label="Remove">×</button>
@@ -484,7 +484,7 @@ export default function DeviceEditorForm({ mode, deviceId, initialData, allCases
         {images.length > 0 && (
           <div className="grid grid-cols-3 gap-2">
             {images.map((img, i) => (
-              <div key={img.id ?? i} className="relative aspect-square rounded-lg overflow-hidden border border-white/10 bg-surface">
+              <div key={img.id ?? i} className="relative aspect-square rounded-lg overflow-hidden border border-foreground/10 bg-surface">
                 {img.uploading ? (
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
@@ -624,7 +624,7 @@ export default function DeviceEditorForm({ mode, deviceId, initialData, allCases
           )}
 
           {logbook.length > 0 && (
-            <div className="card divide-y divide-white/10">
+            <div className="card divide-y divide-foreground/10">
               {logbook.map((entry) => (
                 <div key={entry.id} className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
                   <div className="min-w-0">

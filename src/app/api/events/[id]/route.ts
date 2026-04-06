@@ -9,7 +9,7 @@ const updateSchema = z.object({
   venueName: z.string().min(1).max(200).optional(),
   location: z.string().optional().nullable(),
   startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
+  clientName: z.string().optional().nullable(),
   clientPhone: z.string().optional().nullable(),
   clientEmail: z.string().email().optional().nullable().or(z.literal('')),
   comments: z.string().optional().nullable(),
@@ -50,13 +50,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 })
   }
 
-  const { startDate, endDate, clientEmail, ...rest } = parsed.data
+  const { startDate, clientEmail, ...rest } = parsed.data
   const event = await prisma.event.update({
     where: { id },
     data: {
       ...rest,
       ...(startDate ? { startDate: new Date(startDate) } : {}),
-      ...(endDate ? { endDate: new Date(endDate) } : {}),
       ...(clientEmail !== undefined ? { clientEmail: clientEmail || null } : {}),
     },
     include: eventInclude,

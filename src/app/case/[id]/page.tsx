@@ -82,7 +82,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                 {caseData.items.length} items
               </span>
             </h2>
-            <div className="card divide-y divide-white/10">
+            <div className="card divide-y divide-foreground/10">
               {caseData.items.map((item) => (
                 <div
                   key={item.id}

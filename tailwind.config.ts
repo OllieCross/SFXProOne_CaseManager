@@ -10,10 +10,10 @@ const config: Config = {
     extend: {
       colors: {
         brand: '#1576bf',
-        background: '#0a0a0a',
-        surface: '#141414',
-        foreground: '#fcfcfc',
-        muted: '#6b7280',
+        background: 'var(--color-background)',
+        surface: 'var(--color-surface)',
+        foreground: 'var(--color-foreground)',
+        muted: 'var(--color-muted)',
       },
       fontFamily: {
         sans: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],

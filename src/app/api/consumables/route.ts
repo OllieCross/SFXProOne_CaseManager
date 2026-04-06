@@ -8,6 +8,8 @@ const createSchema = z.object({
   name: z.string().min(1).max(100),
   unit: z.string().min(1).max(50),
   stockQuantity: z.number().min(0).default(0),
+  warningThreshold: z.number().min(0).optional().nullable(),
+  criticalThreshold: z.number().min(0).optional().nullable(),
   notes: z.string().optional(),
 })
 

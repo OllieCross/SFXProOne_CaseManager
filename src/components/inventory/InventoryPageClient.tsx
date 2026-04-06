@@ -24,7 +24,10 @@ type Device = {
   case: { id: string; name: string } | null
   _count: { images: number; documents: number; logbook: number }
 }
-type Consumable = { id: string; name: string; unit: string; stockQuantity: number; notes: string | null }
+type Consumable = {
+  id: string; name: string; unit: string; stockQuantity: number
+  warningThreshold: number | null; criticalThreshold: number | null; notes: string | null
+}
 type StandaloneItem = { id: string; name: string; quantity: number; comment: string | null }
 
 type Props = {
@@ -167,19 +170,43 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
           <p className="text-muted text-sm">{q ? 'No consumables match.' : 'No consumables yet.'}</p>
         ) : (
           <div className="space-y-2">
-            {filteredConsumables.map((c) => (
-              <div key={c.id} className="card flex items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="font-medium text-sm truncate">{c.name}</p>
-                  <p className="text-muted text-xs mt-0.5">
-                    {c.stockQuantity} {c.unit} in stock{c.notes && <> &middot; {c.notes}</>}
-                  </p>
+            {filteredConsumables.map((c) => {
+              const hasCritical = c.criticalThreshold != null
+              const hasWarning = c.warningThreshold != null
+              const isCritical = hasCritical && c.stockQuantity <= c.criticalThreshold!
+              const isWarning = hasWarning && !isCritical && c.stockQuantity <= c.warningThreshold!
+              const barColor = isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-400' : (hasWarning || hasCritical) ? 'bg-green-500' : 'bg-foreground/20'
+              // Fill is capped at a sensible max: warning threshold * 4, or stock * 2, min 1
+              const cap = Math.max(
+                c.warningThreshold != null ? c.warningThreshold * 4 : 0,
+                c.criticalThreshold != null ? c.criticalThreshold * 8 : 0,
+                c.stockQuantity * 1.5,
+                1
+              )
+              const fill = Math.min(c.stockQuantity / cap, 1)
+              return (
+                <div key={c.id} className="card flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      {isCritical && <span className="text-red-400 text-xs font-bold">!</span>}
+                      <p className="font-medium text-sm truncate">{c.name}</p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex-1 h-1.5 rounded-full bg-foreground/10 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${barColor}`}
+                          style={{ width: `${fill * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-muted shrink-0">{c.stockQuantity} {c.unit}</span>
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    <Link href={`/consumables/${c.id}/edit`} className="btn-primary text-xs py-1.5 px-3">View</Link>
+                  </div>
                 </div>
-                <div className="shrink-0">
-                  <Link href={`/consumables/${c.id}/edit`} className="btn-primary text-xs py-1.5 px-3">View</Link>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </section>

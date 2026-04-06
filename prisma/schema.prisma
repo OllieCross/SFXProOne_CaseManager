@@ -190,15 +190,17 @@ model DeviceDocument {
 }
 
 model Consumable {
-  id               String             @id @default(cuid())
-  name             String
-  unit             String
-  stockQuantity    Float              @default(0)
-  notes            String?
-  groupConsumables GroupConsumable[]
-  eventConsumables EventConsumable[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                String             @id @default(cuid())
+  name              String
+  unit              String
+  stockQuantity     Float              @default(0)
+  warningThreshold  Float?
+  criticalThreshold Float?
+  notes             String?
+  groupConsumables  GroupConsumable[]
+  eventConsumables  EventConsumable[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model Group {
@@ -255,7 +257,7 @@ model Event {
   venueName     String
   location      String?
   startDate     DateTime
-  endDate       DateTime
+  clientName    String?
   clientPhone   String?
   clientEmail   String?
   comments      String?

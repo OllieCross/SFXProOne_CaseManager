@@ -82,7 +82,7 @@ export default function PDFViewer({ url, title }: Props) {
           <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" />
         </div>
       )}
-      <canvas ref={canvasRef} className={`w-full rounded-lg border border-white/10${loading ? ' hidden' : ''}`} />
+      <canvas ref={canvasRef} className={`w-full rounded-lg border border-foreground/10${loading ? ' hidden' : ''}`} />
 
       {numPages > 1 && (
         <div className="flex items-center gap-4">

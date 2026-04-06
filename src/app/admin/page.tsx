@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Header from '@/components/layout/Header'
 import RoleSelector from '@/components/admin/RoleSelector'
+import CreateUserButton from '@/components/admin/CreateUserButton'
 import { formatDate, formatDateTime } from '@/lib/utils'
 
 const ACTION_LABEL: Record<string, string> = {
@@ -92,13 +93,18 @@ export default async function AdminPage() {
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-10">
         <section>
-          <h1 className="text-xl font-bold mb-1">Admin Panel</h1>
-          <p className="text-sm text-gray-400 mb-6">Manage users and their access roles.</p>
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <div>
+              <h1 className="text-xl font-bold mb-1">Admin Panel</h1>
+              <p className="text-sm text-gray-400">Manage users and their access roles.</p>
+            </div>
+            <CreateUserButton />
+          </div>
 
           <div className="card overflow-hidden p-0 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-gray-400">
+                <tr className="border-b border-foreground/10 text-left text-gray-400">
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Joined</th>
@@ -109,7 +115,7 @@ export default async function AdminPage() {
                 {users.map((user, i) => (
                   <tr
                     key={user.id}
-                    className={i < users.length - 1 ? 'border-b border-white/5' : ''}
+                    className={i < users.length - 1 ? 'border-b border-foreground/5' : ''}
                   >
                     <td className="px-4 py-3 font-medium">{user.name}</td>
                     <td className="px-4 py-3 text-gray-400">{user.email}</td>
@@ -140,7 +146,7 @@ export default async function AdminPage() {
             <div className="card overflow-hidden p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 text-left text-gray-400">
+                  <tr className="border-b border-foreground/10 text-left text-gray-400">
                     <th className="px-4 py-3 font-medium">When</th>
                     <th className="px-4 py-3 font-medium">User</th>
                     <th className="px-4 py-3 font-medium">Action</th>
@@ -151,7 +157,7 @@ export default async function AdminPage() {
                   {auditLogs.map((log, i) => (
                     <tr
                       key={log.id}
-                      className={i < auditLogs.length - 1 ? 'border-b border-white/5' : ''}
+                      className={i < auditLogs.length - 1 ? 'border-b border-foreground/5' : ''}
                     >
                       <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
                         {formatDateTime(log.createdAt)}

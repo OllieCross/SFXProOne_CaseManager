@@ -43,7 +43,7 @@ export default function Footer() {
   const isAdmin = session?.user?.role === 'ADMIN'
 
   return (
-    <footer className="border-t border-white/10 mt-auto pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] px-4">
+    <footer className="border-t border-foreground/10 mt-auto pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] px-4">
       <div className="max-w-3xl mx-auto flex items-center justify-between text-xs text-muted">
         {/* Credits */}
         <div className="flex items-center gap-2.5">

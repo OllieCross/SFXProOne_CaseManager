@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils'
 
 const ROLE_BADGE: Record<string, string> = {
   ADMIN: 'bg-brand/20 text-brand',
-  EDITOR: 'bg-white/10 text-foreground/80',
-  VIEWER: 'bg-white/5 text-muted',
+  EDITOR: 'bg-foreground/10 text-foreground/80',
+  VIEWER: 'bg-foreground/5 text-muted',
 }
 
 export default function Header() {
@@ -28,7 +28,7 @@ export default function Header() {
     roleOrder.indexOf(role) >= roleOrder.indexOf(minRole)
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-background/80 backdrop-blur-md pt-[env(safe-area-inset-top)]">
+    <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background/80 backdrop-blur-md pt-[env(safe-area-inset-top)]">
       <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
         {/* Logo + title */}
         <Link href="/scan" className="flex items-center gap-2.5 shrink-0">
@@ -52,8 +52,8 @@ export default function Header() {
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                   pathname.startsWith(href)
-                    ? 'bg-white/10 text-foreground'
-                    : 'text-muted hover:text-foreground hover:bg-white/5'
+                    ? 'bg-foreground/10 text-foreground'
+                    : 'text-muted hover:text-foreground hover:bg-foreground/5'
                 )}
               >
                 {label}
@@ -65,9 +65,12 @@ export default function Header() {
         {/* User + sign out */}
         <div className="flex items-center gap-2 shrink-0">
           {role && (
-            <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', ROLE_BADGE[role])}>
+            <Link
+              href="/profile"
+              className={cn('text-xs font-medium px-2 py-0.5 rounded-full transition-opacity hover:opacity-80', ROLE_BADGE[role])}
+            >
               {role.charAt(0) + role.slice(1).toLowerCase()}
-            </span>
+            </Link>
           )}
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
