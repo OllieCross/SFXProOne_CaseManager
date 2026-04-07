@@ -21,10 +21,10 @@ export default async function EditGroupPage({ params }: { params: Promise<{ id: 
         consumables: { include: { consumable: { select: { id: true, name: true, unit: true } } } },
       },
     }),
-    prisma.case.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
-    prisma.device.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
+    prisma.case.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
+    prisma.device.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
     prisma.item.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
-    prisma.consumable.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
+    prisma.consumable.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
   ])
 
   if (!group) notFound()

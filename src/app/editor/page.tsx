@@ -10,6 +10,7 @@ export default async function InventoryPage() {
 
   const [cases, devices, consumables, standaloneItems] = await Promise.all([
     prisma.case.findMany({
+      where: { deletedAt: null },
       orderBy: { updatedAt: 'desc' },
       include: {
         items: { select: { name: true } },
@@ -18,14 +19,15 @@ export default async function InventoryPage() {
       },
     }),
     prisma.device.findMany({
+      where: { deletedAt: null },
       orderBy: { updatedAt: 'desc' },
       include: {
         case: { select: { id: true, name: true } },
         _count: { select: { images: true, documents: true, logbook: true } },
       },
     }),
-    prisma.consumable.findMany({ orderBy: { name: 'asc' } }),
-    prisma.item.findMany({ where: { caseId: null }, orderBy: { name: 'asc' } }),
+    prisma.consumable.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' } }),
+    prisma.item.findMany({ where: { caseId: null, deletedAt: null }, orderBy: { name: 'asc' } }),
   ])
 
   const role = session.user.role

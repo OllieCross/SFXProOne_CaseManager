@@ -62,7 +62,7 @@ export async function DELETE(_req: Request, { params }: Params) {
   const consumable = await prisma.consumable.findUnique({ where: { id }, select: { name: true } })
   if (!consumable) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await prisma.consumable.delete({ where: { id } })
+  await prisma.consumable.update({ where: { id }, data: { deletedAt: new Date() } })
   await logAudit('CONSUMABLE_UPDATED', session.user.id, id, { name: consumable.name, deleted: true })
 
   return NextResponse.json({ ok: true })

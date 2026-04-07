@@ -87,9 +87,10 @@ export async function DELETE(_req: Request, { params }: Params) {
   }
 
   const { id } = await params
-  const device = await prisma.device.delete({ where: { id } })
+  const device = await prisma.device.findUnique({ where: { id }, select: { name: true } })
+  await prisma.device.update({ where: { id }, data: { deletedAt: new Date() } })
 
-  await logAudit('DEVICE_DELETED', session.user.id, id, { deviceName: device.name })
+  await logAudit('DEVICE_DELETED', session.user.id, id, { deviceName: device?.name })
 
   return NextResponse.json({ ok: true })
 }

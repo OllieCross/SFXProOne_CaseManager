@@ -32,18 +32,30 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
 
   const { id } = await params
 
-  const device = await prisma.device.findUnique({
-    where: { id },
-    include: {
-      case: { select: { id: true, name: true } },
-      images: { orderBy: { createdAt: 'asc' } },
-      documents: { orderBy: { createdAt: 'asc' } },
-      logbook: {
-        orderBy: { date: 'desc' },
-        include: { user: { select: { name: true } } },
+  const [device, recentEvents] = await Promise.all([
+    prisma.device.findUnique({
+      where: { id },
+      include: {
+        case: { select: { id: true, name: true } },
+        images: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } },
+        documents: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } },
+        logbook: {
+          orderBy: { date: 'desc' },
+          include: { user: { select: { name: true } } },
+        },
       },
-    },
-  })
+    }),
+    prisma.event.findMany({
+      where: {
+        devices: { some: { deviceId: id } },
+        startDate: { lte: new Date() },
+        status: { in: ['Completed', 'Confirmed'] },
+      },
+      orderBy: { startDate: 'desc' },
+      take: 3,
+      select: { id: true, name: true, startDate: true, status: true },
+    }),
+  ])
 
   if (!device) notFound()
 
@@ -173,6 +185,26 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
               <Link href={`/devices/${id}/edit`} className="text-brand text-sm hover:underline">
                 + Add logbook entry
               </Link>
+            </div>
+          )}
+        </section>
+
+        {/* Recent Events */}
+        <section>
+          <h2 className="text-lg font-semibold mb-3">Recent Events</h2>
+          {recentEvents.length === 0 ? (
+            <p className="text-muted text-sm">No recent events.</p>
+          ) : (
+            <div className="card divide-y divide-foreground/10">
+              {recentEvents.map((ev) => (
+                <div key={ev.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div>
+                    <p className="text-sm font-medium">{ev.name}</p>
+                    <p className="text-xs text-muted mt-0.5">{formatDate(ev.startDate)}</p>
+                  </div>
+                  <Link href={`/events/${ev.id}`} className="text-xs text-brand hover:underline shrink-0">View</Link>
+                </div>
+              ))}
             </div>
           )}
         </section>

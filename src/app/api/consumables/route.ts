@@ -18,6 +18,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const consumables = await prisma.consumable.findMany({
+    where: { deletedAt: null },
     orderBy: { name: 'asc' },
   })
 

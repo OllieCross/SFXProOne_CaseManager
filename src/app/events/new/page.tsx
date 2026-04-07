@@ -11,10 +11,10 @@ export default async function NewEventPage() {
 
   const [allUsers, allCases, allDevices, allItems, allConsumables, allGroups] = await Promise.all([
     prisma.user.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, email: true } }),
-    prisma.case.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
-    prisma.device.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
-    prisma.item.findMany({ where: { caseId: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
-    prisma.consumable.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
+    prisma.case.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
+    prisma.device.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
+    prisma.item.findMany({ where: { caseId: null, deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
+    prisma.consumable.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
     prisma.group.findMany({
       orderBy: { name: 'asc' },
       include: {

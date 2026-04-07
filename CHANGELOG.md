@@ -4,6 +4,39 @@ All notable changes to SFXProOne CaseManager are documented here.
 
 ---
 
+## v1.2.0 - 2026-04-07
+
+### Added
+
+- **Recycle Bin (Admin)**: deleting a Case, Device, Item, Consumable, Photo, or Document now soft-deletes (sets `deletedAt`) instead of immediately destroying the record; items are permanently purged after 7 days
+- **Recycle Bin page (`/admin/recycle-bin`)**: admins can browse all soft-deleted items by category, see how many days remain before permanent deletion, and restore any item with one click
+- **Purge Expired button**: admins can trigger an immediate purge of all items past the 7-day retention window (also deletes files from MinIO); accessible from the Recycle Bin page
+- **Recycle Bin link in Admin Panel**: a "Recycle Bin" button in the Admin Panel header navigates to the recycle bin page
+- **Theme toggle (sun/moon) in header**: a small sun/moon icon button in the top-right header lets users manually switch between light and dark mode; preference is saved to `localStorage` and persists across sessions; on first visit (no saved preference) the OS/browser theme is detected automatically via `prefers-color-scheme`
+
+---
+
+## v1.1.9 - 2026-04-07
+
+### Added
+
+- **Issues page (`/issues`)**: new page listing all devices with status Faulty or In Repair, with their last 3 logbook entries; accessible via a red "Issues" button in the Inventory header
+- **Report Issue form**: any logged-in user can submit a manual issue report from the Issues page by selecting an entity type (Device, Case, or Item), picking the specific entity, and writing a description; submitted issues appear in a "Reported Issues" section below the device list
+
+---
+
+## v1.1.8 - 2026-04-07
+
+### Added
+
+- **Recent Events on case/device detail pages**: each case and device detail page now shows the 3 most recent completed or confirmed events that included the item, with event name, date, and a View link; shows "No recent events." when none qualify
+
+### Fixed
+
+- **Docker build: CSS opacity classes on CSS-variable colors**: Tailwind `text-foreground/70`, `bg-foreground/5`, etc. now compile correctly in the Docker production build; CSS color variables switched from hex values to RGB channel tuples so Tailwind can inject the alpha value
+
+---
+
 ## v1.1.7 - 2026-04-07
 
 ### Added

@@ -27,6 +27,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const cases = await prisma.case.findMany({
+    where: { deletedAt: null },
     orderBy: { updatedAt: 'desc' },
     include: {
       createdBy: { select: { id: true, name: true } },

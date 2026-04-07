@@ -34,7 +34,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
+      <head>
+        {/* Inline script: set theme class before first paint to avoid flash */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var stored = localStorage.getItem('theme');
+            var theme = stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            document.documentElement.className = theme;
+          })();
+        `}} />
+      </head>
       <body>
         <SessionProvider>
           <div className="min-h-screen flex flex-col">

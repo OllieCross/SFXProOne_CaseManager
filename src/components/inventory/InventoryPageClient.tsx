@@ -74,7 +74,15 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Inventory</h1>
-        <QRGenerator />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/issues"
+            className="bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors"
+          >
+            Issues
+          </Link>
+          <QRGenerator />
+        </div>
       </div>
 
       {canEdit && (

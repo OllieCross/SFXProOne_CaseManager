@@ -10,10 +10,10 @@ export default async function NewGroupPage() {
   if (!['EDITOR', 'ADMIN'].includes(session.user.role)) redirect('/groups')
 
   const [allCases, allDevices, allItems, allConsumables] = await Promise.all([
-    prisma.case.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
-    prisma.device.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
-    prisma.item.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
-    prisma.consumable.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
+    prisma.case.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
+    prisma.device.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
+    prisma.item.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
+    prisma.consumable.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
   ])
 
   return (

@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { deleteFile } from '@/lib/minio'
-
 type Params = { params: Promise<{ id: string; docId: string }> }
 
 export async function DELETE(_req: Request, { params }: Params) {
@@ -16,8 +14,7 @@ export async function DELETE(_req: Request, { params }: Params) {
   const doc = await prisma.deviceDocument.findUnique({ where: { id: docId } })
   if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await deleteFile(doc.fileKey)
-  await prisma.deviceDocument.delete({ where: { id: docId } })
+  await prisma.deviceDocument.update({ where: { id: docId }, data: { deletedAt: new Date() } })
 
   return NextResponse.json({ ok: true })
 }

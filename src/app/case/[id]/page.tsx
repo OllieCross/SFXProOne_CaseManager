@@ -14,16 +14,28 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
 
   const { id } = await params
 
-  const caseData = await prisma.case.findUnique({
-    where: { id },
-    include: {
-      items: { orderBy: { sortOrder: 'asc' } },
-      images: { orderBy: { createdAt: 'asc' } },
-      documents: { orderBy: { createdAt: 'asc' } },
-      createdBy: { select: { name: true } },
-      updatedBy: { select: { name: true } },
-    },
-  })
+  const [caseData, recentEvents] = await Promise.all([
+    prisma.case.findUnique({
+      where: { id },
+      include: {
+        items: { orderBy: { sortOrder: 'asc' } },
+        images: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } },
+        documents: { where: { deletedAt: null }, orderBy: { createdAt: "asc" } },
+        createdBy: { select: { name: true } },
+        updatedBy: { select: { name: true } },
+      },
+    }),
+    prisma.event.findMany({
+      where: {
+        cases: { some: { caseId: id } },
+        startDate: { lte: new Date() },
+        status: { in: ['Completed', 'Confirmed'] },
+      },
+      orderBy: { startDate: 'desc' },
+      take: 3,
+      select: { id: true, name: true, startDate: true, status: true },
+    }),
+  ])
 
   if (!caseData) notFound()
 
@@ -133,6 +145,26 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
             </div>
           </section>
         )}
+
+        {/* Recent Events */}
+        <section>
+          <h2 className="text-lg font-semibold mb-3">Recent Events</h2>
+          {recentEvents.length === 0 ? (
+            <p className="text-muted text-sm">No recent events.</p>
+          ) : (
+            <div className="card divide-y divide-foreground/10">
+              {recentEvents.map((ev) => (
+                <div key={ev.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div>
+                    <p className="text-sm font-medium">{ev.name}</p>
+                    <p className="text-xs text-muted mt-0.5">{formatDate(ev.startDate)}</p>
+                  </div>
+                  <Link href={`/events/${ev.id}`} className="text-xs text-brand hover:underline shrink-0">View</Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Footer meta */}
         <p className="text-muted text-xs">

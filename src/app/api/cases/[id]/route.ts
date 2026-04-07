@@ -120,7 +120,7 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
 
   const { id } = await params
   const caseData = await prisma.case.findUnique({ where: { id }, select: { name: true } })
-  await prisma.case.delete({ where: { id } })
+  await prisma.case.update({ where: { id }, data: { deletedAt: new Date() } })
   await logAudit('CASE_DELETED', session.user.id, id, { caseName: caseData?.name })
   return new NextResponse(null, { status: 204 })
 }

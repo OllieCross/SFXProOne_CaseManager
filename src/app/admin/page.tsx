@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import Header from '@/components/layout/Header'
 import RoleSelector from '@/components/admin/RoleSelector'
@@ -98,7 +99,10 @@ export default async function AdminPage() {
               <h1 className="text-xl font-bold mb-1">Admin Panel</h1>
               <p className="text-sm text-gray-400">Manage users and their access roles.</p>
             </div>
-            <CreateUserButton />
+            <div className="flex items-center gap-2">
+              <Link href="/admin/recycle-bin" className="btn-ghost text-sm">Recycle Bin</Link>
+              <CreateUserButton />
+            </div>
           </div>
 
           <div className="card overflow-hidden p-0 overflow-x-auto">

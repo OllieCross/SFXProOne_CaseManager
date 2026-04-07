@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 
 const ROLE_BADGE: Record<string, string> = {
   ADMIN: 'bg-brand/20 text-brand',
@@ -64,6 +65,7 @@ export default function Header() {
 
         {/* User + sign out */}
         <div className="flex items-center gap-2 shrink-0">
+          <ThemeToggle />
           {role && (
             <Link
               href="/profile"

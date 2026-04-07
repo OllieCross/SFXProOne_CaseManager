@@ -20,6 +20,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const devices = await prisma.device.findMany({
+    where: { deletedAt: null },
     orderBy: { updatedAt: 'desc' },
     include: {
       case: { select: { id: true, name: true } },

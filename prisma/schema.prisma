@@ -49,17 +49,18 @@ enum InvoiceStatus {
 }
 
 model User {
-  id             String           @id @default(cuid())
-  name           String
-  email          String           @unique
-  password       String?
-  createdAt      DateTime         @default(now())
-  role           Role             @default(VIEWER)
-  casesCreated   Case[]           @relation("CreatedBy")
-  casesUpdated   Case[]           @relation("UpdatedBy")
-  auditLogs      AuditLog[]
-  logbookEntries LogbookEntry[]
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  password        String?
+  createdAt       DateTime         @default(now())
+  role            Role             @default(VIEWER)
+  casesCreated    Case[]           @relation("CreatedBy")
+  casesUpdated    Case[]           @relation("UpdatedBy")
+  auditLogs       AuditLog[]
+  logbookEntries  LogbookEntry[]
   eventStagehands EventStagehand[]
+  issueEntries    IssueEntry[]
 }
 
 model AuditLog {
@@ -95,6 +96,8 @@ model Case {
   updatedAt         DateTime     @updatedAt
   groupCases        GroupCase[]
   eventCases        EventCase[]
+  issueEntries      IssueEntry[]
+  deletedAt         DateTime?
 }
 
 model Item {
@@ -107,32 +110,36 @@ model Item {
   sortOrder  Int         @default(0)
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
-  groupItems GroupItem[]
-  eventItems EventItem[]
+  groupItems   GroupItem[]
+  eventItems   EventItem[]
+  issueEntries IssueEntry[]
+  deletedAt    DateTime?
 }
 
 model Image {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   caseId    String
-  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  fileKey   String   @unique
+  case      Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  fileKey   String    @unique
   fileName  String
   fileSize  Int
   mimeType  String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 }
 
 model Document {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   caseId    String
-  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  case      Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
   title     String
   type      DocType
-  fileKey   String   @unique
+  fileKey   String    @unique
   fileName  String
   fileSize  Int
   mimeType  String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 }
 
 model Device {
@@ -150,8 +157,10 @@ model Device {
   logbook        LogbookEntry[]
   groupDevices   GroupDevice[]
   eventDevices   EventDevice[]
+  issueEntries   IssueEntry[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
 }
 
 model LogbookEntry {
@@ -166,27 +175,29 @@ model LogbookEntry {
 }
 
 model DeviceImage {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   deviceId  String
-  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-  fileKey   String   @unique
+  device    Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  fileKey   String    @unique
   fileName  String
   fileSize  Int
   mimeType  String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 }
 
 model DeviceDocument {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   deviceId  String
-  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  device    Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   title     String
   type      DocType
-  fileKey   String   @unique
+  fileKey   String    @unique
   fileName  String
   fileSize  Int
   mimeType  String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 }
 
 model Consumable {
@@ -201,6 +212,7 @@ model Consumable {
   eventConsumables  EventConsumable[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+  deletedAt         DateTime?
 }
 
 model Group {
@@ -317,4 +329,18 @@ model EventConsumable {
   quantityUsed   Float?
 
   @@id([eventId, consumableId])
+}
+
+model IssueEntry {
+  id          String   @id @default(cuid())
+  description String
+  deviceId    String?
+  device      Device?  @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  caseId      String?
+  case        Case?    @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  itemId      String?
+  item        Item?    @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
 }
