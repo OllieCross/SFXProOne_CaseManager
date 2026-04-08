@@ -4,6 +4,29 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.3.7 - 2026-04-08
+
+### Added
+
+- **Events - Today highlight border**: today's event card now has a solid 2px green border stroke stacked on top of the existing green glow, making the highlight clearly visible
+
+### Changed
+
+- **Issues page - section headings**: "Faulty / In Repair Devices" renamed to "Devices"; "Reported Issues" renamed to "Issues"
+- **Issues page - Delete button**: delete button on reported issue cards is now red by default with no hover transition (mobile-first)
+- **Groups page - card subtitle**: member count removed; cards now show only cases, devices and items counts; falls back to "Empty" if none
+- **Event form - Client Details**: card is now always expanded; toggle button and chevron removed
+- **Admin panel - layout**: Recycle Bin button moved to the same row as Create User (aligned right) and given a trash bin icon; user table padding reduced; email column previously removed
+
+### Fixed
+
+- **Pyro detail page - middot entity**: `&middot;` was rendering as a literal string between category and brand; replaced with the `·` Unicode character (same fix applied to the documents section)
+- **Confirmation modal - backdrop blur edge on desktop**: backdrop changed from `absolute` to `fixed` so it covers the full viewport including the header, eliminating the visible clipped edge
+- **Event form - Start Date / Start Time alignment**: both fields now have an explicit fixed height (`h-[42px]`) and `flex flex-col` wrappers so they align correctly regardless of native browser rendering differences; gap increased to `gap-4`
+- **Device form - Purchase Date field width**: added `appearance-none` to the date input to prevent iOS Safari from expanding the field beyond the container width
+
+---
+
 ## v1.3.6 - 2026-04-08
 
 ### Added

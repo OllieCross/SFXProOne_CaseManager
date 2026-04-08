@@ -119,26 +119,32 @@ export default async function AdminPage() {
       <Header />
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-10">
         <section>
-          <div className="flex items-center justify-between gap-3 mb-6">
-            <div>
-              <h1 className="text-xl font-bold mb-1">Admin Panel</h1>
-              <p className="text-sm text-gray-400">Manage users and their access roles.</p>
-            </div>
-            <Link href="/admin/recycle-bin" className="btn-ghost text-sm">Recycle Bin</Link>
+          <div className="mb-5">
+            <h1 className="text-xl font-bold mb-1">Admin Panel</h1>
+            <p className="text-sm text-gray-400">Manage users and their access roles.</p>
           </div>
 
-          <div className="mb-4">
+          <div className="flex items-center gap-2 mb-4">
             <CreateUserButton />
+            <Link href="/admin/recycle-bin" className="btn-ghost text-sm flex items-center gap-1.5 ml-auto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14H6L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4h6v2" />
+              </svg>
+              Recycle Bin
+            </Link>
           </div>
 
-          <div className="card overflow-hidden p-0 overflow-x-auto">
-            <table className="w-full text-sm min-w-[480px]">
+          <div className="card overflow-hidden p-0">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-foreground/10 text-left text-gray-400">
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Joined</th>
-                  <th className="px-4 py-3 font-medium">Role</th>
-                  <th className="px-4 py-3 font-medium"></th>
+                  <th className="px-3 py-2.5 font-medium">Name</th>
+                  <th className="px-3 py-2.5 font-medium">Joined</th>
+                  <th className="px-3 py-2.5 font-medium">Role</th>
+                  <th className="px-3 py-2.5 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -147,16 +153,16 @@ export default async function AdminPage() {
                     key={user.id}
                     className={i < users.length - 1 ? 'border-b border-foreground/5' : ''}
                   >
-                    <td className="px-4 py-3 font-medium">{user.name}</td>
-                    <td className="px-4 py-3 text-gray-400">{formatDate(user.createdAt)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2.5 font-medium">{user.name}</td>
+                    <td className="px-3 py-2.5 text-gray-400 text-xs">{formatDate(user.createdAt)}</td>
+                    <td className="px-3 py-2.5">
                       <RoleSelector
                         userId={user.id}
                         currentRole={user.role}
                         isSelf={user.id === session.user.id}
                       />
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-3 py-2.5 text-right">
                       {user.id !== session.user.id && (
                         <DeleteUserButton userId={user.id} userName={user.name ?? user.email} />
                       )}

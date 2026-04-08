@@ -67,7 +67,7 @@ export default async function PyroPag({ params }: { params: Promise<{ id: string
           <div>
             <h1 className="text-2xl font-bold">{pyro.name}</h1>
             <p className="text-sm text-muted mt-1">
-              {pyro.category}{pyro.brand ? ` &middot; ${pyro.brand}` : ''}
+              {pyro.category}{pyro.brand ? ` · ${pyro.brand}` : ''}
             </p>
           </div>
           {canEdit && (
@@ -127,7 +127,7 @@ export default async function PyroPag({ params }: { params: Promise<{ id: string
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <p className="font-medium text-sm">{doc.title}</p>
-                      <p className="text-muted text-xs mt-0.5">{doc.type} &middot; {doc.fileName}</p>
+                      <p className="text-muted text-xs mt-0.5">{doc.type} · {doc.fileName}</p>
                     </div>
                   </div>
                   <PDFViewer url={doc.url} title={doc.title} />

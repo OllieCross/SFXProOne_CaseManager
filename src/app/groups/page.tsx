@@ -39,17 +39,17 @@ export default async function GroupsPage() {
         ) : (
           <div className="space-y-2">
             {groups.map((g) => {
-              const total = g._count.cases + g._count.devices + g._count.items + g._count.consumables
+              const parts = [
+                g._count.cases > 0 && `${g._count.cases} case${g._count.cases !== 1 ? 's' : ''}`,
+                g._count.devices > 0 && `${g._count.devices} device${g._count.devices !== 1 ? 's' : ''}`,
+                g._count.items > 0 && `${g._count.items} item${g._count.items !== 1 ? 's' : ''}`,
+              ].filter(Boolean)
               return (
                 <div key={g.id} className="card flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{g.name}</p>
                     <p className="text-muted text-xs mt-0.5">
-                      {total} member{total !== 1 ? 's' : ''}
-                      {g._count.cases > 0 && ` · ${g._count.cases} case${g._count.cases !== 1 ? 's' : ''}`}
-                      {g._count.devices > 0 && ` · ${g._count.devices} device${g._count.devices !== 1 ? 's' : ''}`}
-                      {g._count.items > 0 && ` · ${g._count.items} item${g._count.items !== 1 ? 's' : ''}`}
-                      {g._count.consumables > 0 && ` · ${g._count.consumables} consumable${g._count.consumables !== 1 ? 's' : ''}`}
+                      {parts.length > 0 ? parts.join(' · ') : 'Empty'}
                     </p>
                   </div>
                   {canEdit && (

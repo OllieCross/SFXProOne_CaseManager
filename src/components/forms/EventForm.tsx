@@ -132,9 +132,6 @@ export default function EventForm({
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [clientOpen, setClientOpen] = useState(
-    !!(initialData?.clientName || initialData?.clientPhone || initialData?.clientEmail)
-  )
 
   // ---------- Helpers ----------
 
@@ -367,14 +364,14 @@ export default function EventForm({
           <input type="text" className="input-field" placeholder="e.g. Vienna, Austria"
             value={location} onChange={(e) => setLocation(e.target.value)} />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col">
             <label className="block text-sm font-medium mb-1.5">Start Date *</label>
-            <input type="date" required className="input-field" value={startDateVal} onChange={(e) => setStartDateVal(e.target.value)} />
+            <input type="date" required className="input-field h-[42px]" value={startDateVal} onChange={(e) => setStartDateVal(e.target.value)} />
           </div>
-          <div>
+          <div className="flex flex-col">
             <label className="block text-sm font-medium mb-1.5">Start Time *</label>
-            <select className="input-field" value={startTimeVal} onChange={(e) => setStartTimeVal(e.target.value)}>
+            <select className="input-field h-[42px]" value={startTimeVal} onChange={(e) => setStartTimeVal(e.target.value)}>
               {TIME_OPTIONS.map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
@@ -383,38 +380,26 @@ export default function EventForm({
         </div>
       </section>
 
-      {/* Client - collapsible */}
+      {/* Client */}
       <section className="card space-y-4">
-        <button
-          type="button"
-          onClick={() => setClientOpen(v => !v)}
-          className="flex items-center justify-between w-full text-left"
-        >
-          <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Client Details (optional)</h2>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            className={`text-muted transition-transform duration-150 ${clientOpen ? 'rotate-180' : ''}`}>
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </button>
-        {clientOpen && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Client Name</label>
-              <input type="text" className="input-field" placeholder="e.g. Acme Corp"
-                value={clientName} onChange={(e) => setClientName(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Phone</label>
-              <input type="tel" className="input-field" placeholder="+43 123 456 789"
-                value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5">Email</label>
-              <input type="email" className="input-field" placeholder="client@example.com"
-                value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} />
-            </div>
+        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Client Details (optional)</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Client Name</label>
+            <input type="text" className="input-field" placeholder="e.g. Acme Corp"
+              value={clientName} onChange={(e) => setClientName(e.target.value)} />
           </div>
-        )}
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Phone</label>
+            <input type="tel" className="input-field" placeholder="+43 123 456 789"
+              value={clientPhone} onChange={(e) => setClientPhone(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Email</label>
+            <input type="email" className="input-field" placeholder="client@example.com"
+              value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} />
+          </div>
+        </div>
       </section>
 
       {/* Status */}

@@ -155,7 +155,7 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
       {/* Faulty/In Repair Devices */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">
-          Faulty / In Repair Devices ({faultyDevices.length})
+          Devices ({faultyDevices.length})
         </h2>
         {faultyDevices.length === 0 ? (
           <p className="text-muted text-sm">No faulty or in-repair devices.</p>
@@ -191,7 +191,7 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
       {/* Manual Issues */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">
-          Reported Issues ({issues.length})
+          Issues ({issues.length})
         </h2>
         {issues.length === 0 ? (
           <p className="text-muted text-sm card py-4 text-center">No manual issues reported. Use + Report Issue to log a problem.</p>
@@ -205,7 +205,7 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
                     <p className="text-sm">{i.description}</p>
                     <button
                       onClick={() => setDeleteTarget(i.id)}
-                      className="text-red-400/60 hover:text-red-400 text-xs transition-colors shrink-0"
+                      className="text-red-400 text-xs shrink-0"
                     >
                       Delete
                     </button>

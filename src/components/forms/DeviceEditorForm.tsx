@@ -432,7 +432,7 @@ export default function DeviceEditorForm({ mode, deviceId, initialData, allCases
 
         <div>
           <label className="block text-sm font-medium mb-1.5">Purchase Date</label>
-          <input type="date" className="input-field" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
+          <input type="date" className="input-field appearance-none" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
