@@ -4,6 +4,24 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.3.10 - 2026-04-09
+
+### Changed
+
+- **Pyro create page - submit button**: label shortened from "Create Pyro Effect" to "Create Pyro"
+
+### Added
+
+- **Inventory FAB - item animation**: speed-dial items now animate in with a fade + slide-up effect and staggered delay per item instead of appearing instantly
+
+### Changed
+
+- **Inventory FAB - item contrast**: speed-dial items now use `bg-gray-100` (light mode) and `bg-gray-700` (dark mode) for stronger contrast against the page background and inventory cards
+- **Events page - card interaction**: whole card is now tappable; editors/admins are taken directly to the edit page, viewers to the detail page; Edit button replaced with a chevron indicator
+- **Inventory - Lost device styling**: left border is now white in dark mode (was black and invisible against the dark background); "Lost" status label is now black in light mode and white in dark mode for consistent contrast
+
+---
+
 ## v1.3.9 - 2026-04-08
 
 ### Added

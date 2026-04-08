@@ -10,7 +10,7 @@ const STATUS_LABELS: Record<string, string> = {
 }
 const STATUS_COLORS: Record<string, string> = {
   Working: 'text-green-400', Faulty: 'text-red-400', InRepair: 'text-yellow-400',
-  Retired: 'text-muted', Lost: 'text-red-600', RentedToFriend: 'text-blue-400',
+  Retired: 'text-muted', Lost: 'text-black dark:text-white', RentedToFriend: 'text-blue-400',
 }
 
 type CaseItem = { name: string }
@@ -185,7 +185,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
         ) : (
           <div className="space-y-2">
             {filteredDevices.map((d) => {
-              const borderColor = d.status === 'Faulty' ? 'border-l-red-500' : d.status === 'InRepair' ? 'border-l-yellow-500' : d.status === 'Working' ? 'border-l-green-600' : d.status === 'Lost' ? 'border-l-black' : d.status === 'Retired' ? 'border-l-gray-500' : d.status === 'RentedToFriend' ? 'border-l-blue-400' : 'border-l-transparent'
+              const borderColor = d.status === 'Faulty' ? 'border-l-red-500' : d.status === 'InRepair' ? 'border-l-yellow-500' : d.status === 'Working' ? 'border-l-green-600' : d.status === 'Lost' ? 'border-l-black dark:border-l-white' : d.status === 'Retired' ? 'border-l-gray-500' : d.status === 'RentedToFriend' ? 'border-l-blue-400' : 'border-l-transparent'
               return (
                 <Link key={d.id} href={`/devices/${d.id}`} className={`card flex items-center justify-between gap-4 border-l-[3px] ${borderColor} hover:bg-foreground/5 transition-colors`}>
                   <div className="min-w-0">
@@ -379,12 +379,16 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
         <div ref={fabRef} className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
           {fabOpen && (
             <div className="flex flex-col items-end gap-1.5 mb-1">
-              {FAB_ITEMS.map(({ href, label }) => (
+              {FAB_ITEMS.map(({ href, label }, i) => (
                 <Link
                   key={href}
                   href={href}
                   onClick={() => setFabOpen(false)}
-                  className="bg-surface border border-foreground/10 text-foreground text-sm font-medium px-4 py-2 rounded-xl shadow-lg hover:bg-foreground/5 transition-colors whitespace-nowrap"
+                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-medium px-4 py-2 rounded-xl shadow-xl whitespace-nowrap"
+                  style={{
+                    animation: `fabIn 180ms ease both`,
+                    animationDelay: `${i * 30}ms`,
+                  }}
                 >
                   {label}
                 </Link>

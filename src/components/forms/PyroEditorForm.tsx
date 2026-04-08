@@ -470,7 +470,7 @@ export default function PyroEditorForm({ mode, pyroId, initialData }: Props) {
 
       <div className="flex gap-3 flex-wrap">
         <button type="submit" disabled={saving} className="btn-primary">
-          {saving ? 'Saving...' : mode === 'create' ? 'Create Pyro Effect' : 'Save Changes'}
+          {saving ? 'Saving...' : mode === 'create' ? 'Create Pyro' : 'Save Changes'}
         </button>
         <button type="button" onClick={() => router.back()} className="btn-ghost">Cancel</button>
         {mode === 'edit' && (

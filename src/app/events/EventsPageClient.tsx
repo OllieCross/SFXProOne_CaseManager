@@ -123,16 +123,14 @@ export default function EventsPageClient({ events, canEdit, userId, todayISO, to
             } : undefined}
           >
             {/* Full-card tap target */}
-            <Link href={`/events/${event.id}`} className="absolute inset-0 rounded-xl" aria-label={`View ${event.name}`} />
+            <Link href={canEdit ? `/events/${event.id}/edit` : `/events/${event.id}`} className="absolute inset-0 rounded-xl" aria-label={`View ${event.name}`} />
 
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-medium truncate">{event.name}</p>
                 <p className="text-sm text-muted truncate">{event.venueName}{event.location ? ` - ${event.location}` : ''}</p>
               </div>
-              {canEdit && (
-                <Link href={`/events/${event.id}/edit`} className="relative z-10 btn-ghost text-sm px-3 py-1.5">Edit</Link>
-              )}
+              <span className="text-muted shrink-0 text-lg leading-none">&rsaquo;</span>
             </div>
 
             <div className="flex items-center gap-4 text-xs flex-wrap">
