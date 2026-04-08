@@ -117,8 +117,7 @@ export default function EventsPageClient({ events, canEdit, userId, todayISO, to
             key={event.id}
             className={`card relative space-y-2`}
             style={highlighted ? {
-              outline: '2px solid #16a34a',
-              boxShadow: '0 0 0 2px #16a34a, 0 0 14px 3px rgba(22,163,74,0.25)',
+              animation: 'eventPulse 2.5s ease-in-out infinite',
               transform: 'translateY(-1px)',
             } : undefined}
           >
