@@ -21,7 +21,7 @@ html.light {
   --color-muted: 107 114 128;
 }
 
-/* Semantic status colours — shared across themes */
+/* Semantic status colours - shared across themes */
 :root {
   --status-working:   #16a34a;  /* green-600 */
   --status-warning:   #ca8a04;  /* yellow-600 */

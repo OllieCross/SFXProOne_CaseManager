@@ -28,6 +28,10 @@ export type AuditAction =
   | 'TANK_UPDATED'
   | 'TANK_DELETED'
   | 'TANK_LOGBOOK_ENTRY_ADDED'
+  | 'PYRO_CREATED'
+  | 'PYRO_UPDATED'
+  | 'PYRO_DELETED'
+  | 'PYRO_STOCK_ADJUSTED'
 
 export async function logAudit(
   action: AuditAction,

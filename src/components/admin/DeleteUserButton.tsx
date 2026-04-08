@@ -37,7 +37,7 @@ export default function DeleteUserButton({ userId, userName }: Props) {
           disabled={loading}
           className="text-xs text-red-400 hover:text-red-300 font-medium disabled:opacity-50"
         >
-          {loading ? 'Deleting…' : 'Confirm'}
+          {loading ? 'Deleting...' : 'Confirm'}
         </button>
         <button
           onClick={() => { setConfirming(false); setError(null) }}

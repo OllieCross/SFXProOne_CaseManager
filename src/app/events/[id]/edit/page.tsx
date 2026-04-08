@@ -11,7 +11,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
 
   const { id } = await params
 
-  const [event, allUsers, allCases, allDevices, allItems, allConsumables, allTanks, allGroups] = await Promise.all([
+  const [event, allUsers, allCases, allDevices, allItems, allConsumables, allTanks, allPyros, allGroups] = await Promise.all([
     prisma.event.findUnique({
       where: { id },
       include: {
@@ -21,6 +21,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
         items: { include: { item: { select: { id: true, name: true, quantity: true } } } },
         consumables: { include: { consumable: { select: { id: true, name: true, unit: true } } } },
         tanks: { include: { tank: { select: { id: true, name: true, unit: true, chemicalCompound: true } } } },
+        pyros: { include: { pyro: { select: { id: true, name: true, category: true } } } },
       },
     }),
     prisma.user.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, email: true } }),
@@ -29,6 +30,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
     prisma.item.findMany({ where: { caseId: null, deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
     prisma.consumable.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
     prisma.tank.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true, chemicalCompound: true } }),
+    prisma.pyro.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, category: true, brand: true } }),
     prisma.group.findMany({
       orderBy: { name: 'asc' },
       include: {
@@ -66,6 +68,13 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
       unit: et.tank.unit,
       chemicalCompound: et.tank.chemicalCompound,
     })),
+    ...event.pyros.map((ep) => ({
+      type: 'pyro' as const,
+      id: ep.pyro.id,
+      name: ep.pyro.name,
+      category: ep.pyro.category,
+      quantity: ep.quantityNeeded,
+    })),
   ]
 
   return (
@@ -95,6 +104,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
           allItems={allItems}
           allConsumables={allConsumables}
           allTanks={allTanks}
+          allPyros={allPyros}
           allGroups={allGroups}
         />
       </main>

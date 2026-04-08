@@ -32,6 +32,10 @@ type Tank = {
   id: string; name: string; chemicalCompound: string; unit: string
   fullCapacity: number; currentCapacity: number; notes: string | null
 }
+type Pyro = {
+  id: string; name: string; brand: string | null; category: string
+  stockQuantity: number; warningThreshold: number | null; criticalThreshold: number | null
+}
 
 type Props = {
   cases: Case[]
@@ -39,6 +43,7 @@ type Props = {
   consumables: Consumable[]
   standaloneItems: StandaloneItem[]
   tanks: Tank[]
+  pyros: Pyro[]
   canEdit: boolean
   isAdmin: boolean
 }
@@ -54,9 +59,10 @@ const FAB_ITEMS = [
   { href: '/devices/new', label: '+ Device' },
   { href: '/consumables/new', label: '+ Consumable' },
   { href: '/tanks/new', label: '+ Tank' },
+  { href: '/pyro/new', label: '+ Pyro' },
 ]
 
-export default function InventoryPageClient({ cases, devices, consumables, standaloneItems, tanks, canEdit }: Props) {
+export default function InventoryPageClient({ cases, devices, consumables, standaloneItems, tanks, pyros, canEdit }: Props) {
   const [query, setQuery] = useState('')
   const [fabOpen, setFabOpen] = useState(false)
   const fabRef = useRef<HTMLDivElement>(null)
@@ -100,8 +106,12 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
     q ? tanks.filter((t) => t.name.toLowerCase().includes(q)) : tanks,
     [tanks, q]
   )
+  const filteredPyros = useMemo(() =>
+    q ? pyros.filter((p) => p.name.toLowerCase().includes(q) || (p.brand ?? '').toLowerCase().includes(q)) : pyros,
+    [pyros, q]
+  )
 
-  const totalResults = filteredCases.length + filteredDevices.length + filteredConsumables.length + filteredItems.length + filteredTanks.length
+  const totalResults = filteredCases.length + filteredDevices.length + filteredConsumables.length + filteredItems.length + filteredTanks.length + filteredPyros.length
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
@@ -302,6 +312,60 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                         <div className={`h-full rounded-full transition-all ${fillColor}`} style={{ width: `${fillPct}%` }} />
                       </div>
                       <span className="text-sm font-semibold shrink-0">{tank.currentCapacity} <span className="font-normal text-muted">/ {tank.fullCapacity} {tank.unit}</span></span>
+                    </div>
+                  </div>
+                  <span className="text-muted text-xl shrink-0" aria-hidden>&#8250;</span>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Pyro */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider flex items-center gap-2">
+          Pyro <span className="bg-foreground/10 text-foreground/70 text-xs font-semibold rounded-full px-2 py-0.5 normal-case">{filteredPyros.length}</span>
+        </h2>
+        {filteredPyros.length === 0 ? (
+          <p className="text-muted text-sm">{q ? 'No pyro effects match.' : 'No pyro effects yet.'}</p>
+        ) : (
+          <div className="space-y-2">
+            {filteredPyros.map((p) => {
+              const hasCritical = p.criticalThreshold != null
+              const hasWarning = p.warningThreshold != null
+              const isCritical = hasCritical && p.stockQuantity <= p.criticalThreshold!
+              const isWarning = hasWarning && !isCritical && p.stockQuantity <= p.warningThreshold!
+              const barColor = isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-400' : (hasWarning || hasCritical) ? 'bg-green-500' : 'bg-foreground/20'
+              let fill = 0
+              if (p.stockQuantity <= 0) {
+                fill = 0
+              } else if (hasWarning && p.warningThreshold! > 0) {
+                const wt = p.warningThreshold!
+                const ct = hasCritical ? p.criticalThreshold! : 0
+                if (p.stockQuantity >= wt * 2) fill = 1
+                else if (p.stockQuantity >= wt * 1.5) fill = 0.75
+                else if (p.stockQuantity >= wt) fill = 0.5
+                else if (hasCritical && p.stockQuantity >= ct) fill = 0.25
+                else fill = 0
+              } else if (hasCritical && p.criticalThreshold! > 0) {
+                fill = p.stockQuantity >= p.criticalThreshold! ? 0.25 : 0
+              } else {
+                fill = 0.5
+              }
+              return (
+                <Link key={p.id} href={`/pyro/${p.id}/edit`} className="card flex items-center justify-between gap-4 hover:bg-foreground/5 transition-colors">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      {isCritical && <span className="text-red-400 text-xs font-bold">!</span>}
+                      <p className="font-medium text-sm truncate">{p.name}</p>
+                      <span className="text-xs text-muted shrink-0">{p.category}{p.brand ? ` - ${p.brand}` : ''}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <div className="flex-1 h-1.5 rounded-full bg-foreground/10 overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${fill * 100}%` }} />
+                      </div>
+                      <span className="text-sm font-semibold shrink-0">{p.stockQuantity} <span className="font-normal text-muted">units</span></span>
                     </div>
                   </div>
                   <span className="text-muted text-xl shrink-0" aria-hidden>&#8250;</span>

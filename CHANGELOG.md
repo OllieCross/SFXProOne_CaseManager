@@ -4,6 +4,18 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.3.5 - 2026-04-08
+
+### Added
+
+- **Pyro entity**: new inventory entity for pyrotechnic effects; tracks effect name, brand, category (T1/T2/F1/F2/F3/F4/P1/P2/Other), stock quantity, warning/critical thresholds, notes, photos, and documents
+- **Pyro pages**: Pyro List (in Inventory tab), Pyro Detail (with stock bar same logic as consumables), Pyro Create, Pyro Edit (with delete option)
+- **Pyro API routes**: full CRUD at `/api/pyro`, image/document upload via MinIO presigned URLs
+- **Events - Pyro support**: pyro effects can be added to event inventory with quantity prompt; appear in Event Detail and Event Edit views
+- **Inventory tab - Pyro section**: pyro effects shown below Tanks with stock bar (green/yellow/red using same tier logic as consumables); FAB menu includes "+ Pyro"
+
+---
+
 ## v1.3.4 - 2026-04-08
 
 ### Added

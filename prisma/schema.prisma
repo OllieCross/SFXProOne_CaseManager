@@ -48,6 +48,18 @@ enum InvoiceStatus {
   NotPaidInFull
 }
 
+enum PyroCategory {
+  T1
+  T2
+  F1
+  F2
+  F3
+  F4
+  P1
+  P2
+  Other
+}
+
 enum ChemicalCompound {
   H2O
   O2
@@ -295,6 +307,7 @@ model Event {
   items         EventItem[]
   consumables   EventConsumable[]
   tanks         EventTank[]
+  pyros         EventPyro[]
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 }
@@ -413,6 +426,59 @@ model EventTank {
   quantityNeeded  Float?
 
   @@id([eventId, tankId])
+}
+
+model Pyro {
+  id                String       @id @default(cuid())
+  name              String
+  brand             String?
+  category          PyroCategory @default(Other)
+  stockQuantity     Int          @default(0)
+  warningThreshold  Int?
+  criticalThreshold Int?
+  notes             String?
+  images            PyroImage[]
+  documents         PyroDocument[]
+  eventPyros        EventPyro[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  deletedAt         DateTime?
+}
+
+model PyroImage {
+  id        String    @id @default(cuid())
+  pyroId    String
+  pyro      Pyro      @relation(fields: [pyroId], references: [id], onDelete: Cascade)
+  fileKey   String    @unique
+  fileName  String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model PyroDocument {
+  id        String    @id @default(cuid())
+  pyroId    String
+  pyro      Pyro      @relation(fields: [pyroId], references: [id], onDelete: Cascade)
+  title     String
+  type      DocType
+  fileKey   String    @unique
+  fileName  String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model EventPyro {
+  eventId        String
+  event          Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  pyroId         String
+  pyro           Pyro   @relation(fields: [pyroId], references: [id], onDelete: Cascade)
+  quantityNeeded Int
+
+  @@id([eventId, pyroId])
 }
 
 model IssueEntry {

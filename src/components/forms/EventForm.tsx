@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
-type MemberType = 'stagehand' | 'case' | 'device' | 'item' | 'consumable' | 'tank'
+type MemberType = 'stagehand' | 'case' | 'device' | 'item' | 'consumable' | 'tank' | 'pyro'
 
 type UserOption = { id: string; name: string; email: string }
 type CaseOption = { id: string; name: string }
@@ -11,6 +11,7 @@ type DeviceOption = { id: string; name: string; status: string }
 type ItemOption = { id: string; name: string; quantity: number }
 type ConsumableOption = { id: string; name: string; unit: string }
 type TankOption = { id: string; name: string; unit: string; chemicalCompound: string }
+type PyroOption = { id: string; name: string; category: string; brand: string | null }
 
 type GroupOption = {
   id: string
@@ -28,6 +29,7 @@ type EventMember =
   | { type: 'item'; id: string; name: string; quantity: number }
   | { type: 'consumable'; id: string; name: string; unit: string; quantityNeeded: number }
   | { type: 'tank'; id: string; name: string; unit: string; chemicalCompound: string }
+  | { type: 'pyro'; id: string; name: string; category: string; quantity: number }
 
 type Props = {
   mode: 'create' | 'edit'
@@ -51,6 +53,7 @@ type Props = {
   allItems: ItemOption[]
   allConsumables: ConsumableOption[]
   allTanks: TankOption[]
+  allPyros: PyroOption[]
   allGroups: GroupOption[]
 }
 
@@ -95,7 +98,7 @@ const COMPOUND_LABELS: Record<string, string> = {
 }
 
 export default function EventForm({
-  mode, eventId, initialData, allUsers, allCases, allDevices, allItems, allConsumables, allTanks, allGroups,
+  mode, eventId, initialData, allUsers, allCases, allDevices, allItems, allConsumables, allTanks, allPyros, allGroups,
 }: Props) {
   const router = useRouter()
 
@@ -118,7 +121,7 @@ export default function EventForm({
   const [crewId, setCrewId] = useState('')
 
   // Inventory picker
-  const [invType, setInvType] = useState<'case' | 'device' | 'item' | 'consumable' | 'tank'>('case')
+  const [invType, setInvType] = useState<'case' | 'device' | 'item' | 'consumable' | 'tank' | 'pyro'>('case')
   const [invId, setInvId] = useState('')
   const [invQty, setInvQty] = useState(1)
   const [invSearch, setInvSearch] = useState('')
@@ -179,14 +182,18 @@ export default function EventForm({
       const opt = allConsumables.find((c) => c.id === invId)
       if (!opt) return
       member = { type: 'consumable', id: opt.id, name: opt.name, unit: opt.unit, quantityNeeded: invQty }
-    } else {
+    } else if (invType === 'tank') {
       const opt = allTanks.find((t) => t.id === invId)
       if (!opt) return
       member = { type: 'tank', id: opt.id, name: opt.name, unit: opt.unit, chemicalCompound: opt.chemicalCompound }
+    } else {
+      const opt = allPyros.find((p) => p.id === invId)
+      if (!opt) return
+      member = { type: 'pyro', id: opt.id, name: opt.name, category: opt.category, quantity: invQty }
     }
 
     setMembers((prev) => [...prev, member])
-    if (mode === 'edit') patchMember('add', invType, invId, invType === 'consumable' ? invQty : undefined)
+    if (mode === 'edit') patchMember('add', invType, invId, invType === 'consumable' || invType === 'pyro' ? invQty : undefined)
     setInvId('')
     setInvQty(1)
     setInvSearch('')
@@ -244,11 +251,12 @@ export default function EventForm({
     else if (invType === 'device') opts = allDevices.filter((d) => !isMember('device', d.id))
     else if (invType === 'item') opts = allItems.filter((i) => !isMember('item', i.id))
     else if (invType === 'consumable') opts = allConsumables.filter((c) => !isMember('consumable', c.id))
-    else opts = allTanks.filter((t) => !isMember('tank', t.id)).map((t) => ({ ...t, unit: `${COMPOUND_LABELS[t.chemicalCompound] ?? t.chemicalCompound} - ${t.unit}` }))
+    else if (invType === 'tank') opts = allTanks.filter((t) => !isMember('tank', t.id)).map((t) => ({ ...t, unit: `${COMPOUND_LABELS[t.chemicalCompound] ?? t.chemicalCompound} - ${t.unit}` }))
+    else opts = allPyros.filter((p) => !isMember('pyro', p.id)).map((p) => ({ id: p.id, name: p.name, unit: p.category + (p.brand ? ` - ${p.brand}` : '') }))
     if (sq) opts = opts.filter((o) => o.name.toLowerCase().includes(sq))
     return opts
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invType, invSearch, members, allCases, allDevices, allItems, allConsumables, allTanks])
+  }, [invType, invSearch, members, allCases, allDevices, allItems, allConsumables, allTanks, allPyros])
 
   const availableCrew = useMemo(
     () => allUsers.filter((u) => !isMember('stagehand', u.id)),
@@ -334,6 +342,7 @@ export default function EventForm({
   const itemMembers = members.filter((m): m is Extract<EventMember, { type: 'item' }> => m.type === 'item')
   const consumableMembers = members.filter((m): m is Extract<EventMember, { type: 'consumable' }> => m.type === 'consumable')
   const tankMembers = members.filter((m): m is Extract<EventMember, { type: 'tank' }> => m.type === 'tank')
+  const pyroMembers = members.filter((m): m is Extract<EventMember, { type: 'pyro' }> => m.type === 'pyro')
 
   // ---------- Render ----------
 
@@ -489,7 +498,7 @@ export default function EventForm({
         <div className="space-y-3">
           {/* Type tabs */}
           <div className="flex gap-2 flex-wrap">
-            {(['case', 'device', 'item', 'consumable', 'tank'] as const).map((t) => (
+            {(['case', 'device', 'item', 'consumable', 'tank', 'pyro'] as const).map((t) => (
               <button
                 key={t}
                 type="button"
@@ -522,7 +531,7 @@ export default function EventForm({
                 </option>
               ))}
             </select>
-            {(invType === 'consumable' || invType === 'item') && (
+            {(invType === 'consumable' || invType === 'item' || invType === 'pyro') && (
               <input
                 type="number" min={invType === 'item' ? 1 : 0.01} step={invType === 'item' ? 1 : '0.01'} className="input-field w-24" placeholder="Qty"
                 value={invQty} onChange={(e) => setInvQty(invType === 'item' ? parseInt(e.target.value) || 1 : parseFloat(e.target.value) || 1)}
@@ -535,7 +544,7 @@ export default function EventForm({
         </div>
 
         {/* Current inventory */}
-        {(caseMembers.length + deviceMembers.length + itemMembers.length + consumableMembers.length + tankMembers.length) > 0 && (
+        {(caseMembers.length + deviceMembers.length + itemMembers.length + consumableMembers.length + tankMembers.length + pyroMembers.length) > 0 && (
           <div className="space-y-3">
             {caseMembers.length > 0 && (
               <div className="space-y-1">
@@ -574,6 +583,14 @@ export default function EventForm({
                 <p className="text-xs text-muted">Tanks</p>
                 {tankMembers.map((m) => (
                   <MemberRow key={m.id} label={`${m.name} (${COMPOUND_LABELS[m.chemicalCompound] ?? m.chemicalCompound} - ${m.unit})`} onRemove={() => removeMember('tank', m.id)} />
+                ))}
+              </div>
+            )}
+            {pyroMembers.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs text-muted">Pyro</p>
+                {pyroMembers.map((m) => (
+                  <MemberRow key={m.id} label={`${m.name} (${m.category}) x${m.quantity}`} onRemove={() => removeMember('pyro', m.id)} />
                 ))}
               </div>
             )}

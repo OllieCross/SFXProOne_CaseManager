@@ -62,6 +62,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
       items: { include: { item: { select: { id: true, name: true, quantity: true, comment: true } } } },
       consumables: { include: { consumable: { select: { id: true, name: true, unit: true } } } },
       tanks: { include: { tank: { select: { id: true, name: true, unit: true, chemicalCompound: true } } } },
+      pyros: { include: { pyro: { select: { id: true, name: true, category: true } } } },
     },
   })
 
@@ -186,6 +187,24 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     {quantityUsed != null && <span>Used: {quantityUsed} {consumable.unit}</span>}
                   </div>
                 </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Pyro */}
+        {event.pyros.length > 0 && (
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Pyro ({event.pyros.length})</h2>
+            <div className="space-y-1">
+              {event.pyros.map(({ pyro, quantityNeeded }) => (
+                <Link key={pyro.id} href={`/pyro/${pyro.id}`} className="card flex items-center justify-between gap-3 py-2 px-3 hover:bg-foreground/5 transition-colors">
+                  <div>
+                    <p className="text-sm">{pyro.name} <span className="text-muted">x{quantityNeeded}</span></p>
+                    <p className="text-xs text-muted">{pyro.category}</p>
+                  </div>
+                  <span className="text-muted text-xl shrink-0" aria-hidden>&#8250;</span>
+                </Link>
               ))}
             </div>
           </section>
