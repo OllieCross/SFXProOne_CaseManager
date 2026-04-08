@@ -53,7 +53,7 @@ function Section({
               <p className="text-sm font-medium truncate">{item.label}</p>
               <p className="text-xs text-muted">
                 {item.parentName && <span>{item.parentName} &middot; </span>}
-                Deleted {item.deletedAt} &middot; {daysLeft(item.deletedAtRaw)}d until permanent
+                {daysLeft(item.deletedAtRaw)}d left
               </p>
             </div>
             <RestoreButton entityType={entityType} id={item.id} onRestore={onRestore} />
@@ -131,7 +131,7 @@ export default function RecycleBinClient(props: Props) {
           onClick={() => setConfirmPurge(true)}
           disabled={purging}
         >
-          {purging ? 'Emptying...' : 'Empty Recycle Bin'}
+          {purging ? 'Emptying...' : 'Empty'}
         </button>
       </div>
 

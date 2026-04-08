@@ -4,6 +4,21 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.3.8 - 2026-04-08
+
+### Added
+
+- **Events - own crew tag highlight**: the logged-in user's name tag on event cards is now displayed in green, making it easy to spot events you are assigned to at a glance
+
+### Changed
+
+- **Recycle Bin - Empty button**: label shortened from "Empty Recycle Bin" to "Empty"
+- **Recycle Bin - item subtitle**: deletion date removed; countdown shortened from "x d until permanent" to "x d left"
+- **Event form - Start Date/Time gap**: column gap widened for better visual separation
+- **Event form - Start Date height**: added `appearance-none` so the date input matches the height of the Start Time select on iOS Safari
+
+---
+
 ## v1.3.7 - 2026-04-08
 
 ### Added

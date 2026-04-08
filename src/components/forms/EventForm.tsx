@@ -364,10 +364,10 @@ export default function EventForm({
           <input type="text" className="input-field" placeholder="e.g. Vienna, Austria"
             value={location} onChange={(e) => setLocation(e.target.value)} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-8">
           <div className="flex flex-col">
             <label className="block text-sm font-medium mb-1.5">Start Date *</label>
-            <input type="date" required className="input-field h-[42px]" value={startDateVal} onChange={(e) => setStartDateVal(e.target.value)} />
+            <input type="date" required className="input-field h-[42px] appearance-none" value={startDateVal} onChange={(e) => setStartDateVal(e.target.value)} />
           </div>
           <div className="flex flex-col">
             <label className="block text-sm font-medium mb-1.5">Start Time *</label>
