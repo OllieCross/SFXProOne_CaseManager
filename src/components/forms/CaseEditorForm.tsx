@@ -62,6 +62,11 @@ type DocumentRow = {
 type PendingImage = { file: File; previewUrl: string }
 type PendingDocument = { file: File; title: string; type: DocumentRow['type'] }
 
+type DeviceRow = {
+  id: string
+  name: string
+}
+
 type Props = {
   mode: 'create' | 'edit'
   caseId?: string
@@ -73,8 +78,10 @@ type Props = {
     items: ItemRow[]
     images: ImageRow[]
     documents: DocumentRow[]
+    devices: DeviceRow[]
   }
   allCases?: { id: string; name: string }[]
+  allDevices?: DeviceRow[]
 }
 
 // ---------- Helpers ----------
@@ -161,7 +168,7 @@ async function uploadDocumentFile(
 
 // ---------- Component ----------
 
-export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, allCases = [] }: Props) {
+export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, allCases = [], allDevices = [] }: Props) {
   const router = useRouter()
 
   const [activeCaseId] = useState(caseId)
@@ -172,6 +179,8 @@ export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, all
   const [items, setItems] = useState<ItemRow[]>(initialData?.items ?? [])
   const [images, setImages] = useState<ImageRow[]>(initialData?.images ?? [])
   const [documents, setDocuments] = useState<DocumentRow[]>(initialData?.documents ?? [])
+  const [assignedDevices, setAssignedDevices] = useState<DeviceRow[]>(initialData?.devices ?? [])
+  const [selectedDeviceId, setSelectedDeviceId] = useState('')
 
   // Files buffered in create mode, uploaded after case is saved
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([])
@@ -235,6 +244,34 @@ export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, all
       body: JSON.stringify({ targetCaseId }),
     })
     setItems((prev) => prev.filter((item) => item.id !== itemId))
+  }
+
+  // ---------- Device handling ----------
+
+  async function addDevice() {
+    if (!selectedDeviceId) return
+    const device = allDevices.find((d) => d.id === selectedDeviceId)
+    if (!device) return
+    if (mode === 'edit' && activeCaseId) {
+      await fetch(`/api/devices/${selectedDeviceId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caseId: activeCaseId }),
+      })
+    }
+    setAssignedDevices((prev) => [...prev, device])
+    setSelectedDeviceId('')
+  }
+
+  async function removeDevice(deviceId: string) {
+    if (mode === 'edit') {
+      await fetch(`/api/devices/${deviceId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caseId: null }),
+      })
+    }
+    setAssignedDevices((prev) => prev.filter((d) => d.id !== deviceId))
   }
 
   // ---------- Image handling ----------
@@ -366,10 +403,17 @@ export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, all
         }
         const created = await res.json()
 
-        // Upload any buffered files now that we have a caseId
+        // Upload any buffered files and assign devices now that we have a caseId
         await Promise.all([
           ...pendingImages.map((p) => processAndUploadImageWithId(p.file, created.id)),
           ...pendingDocuments.map((p) => uploadDocumentWithId(p.file, p.title, p.type, created.id)),
+          ...assignedDevices.map((d) =>
+            fetch(`/api/devices/${d.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ caseId: created.id }),
+            })
+          ),
         ])
 
         router.push(`/case/${created.id}`)
@@ -510,6 +554,60 @@ export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, all
             </div>
           </SortableContext>
         </DndContext>
+      </section>
+
+      {/* Devices */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Devices</h2>
+        {(() => {
+          const assignedIds = new Set(assignedDevices.map((d) => d.id))
+          const availableDevices = allDevices.filter((d) => !assignedIds.has(d.id))
+          return (
+            <>
+              {assignedDevices.length > 0 && (
+                <div className="space-y-2">
+                  {assignedDevices.map((device) => (
+                    <div key={device.id} className="card py-2.5 px-3 flex items-center justify-between gap-2">
+                      <span className="text-sm font-medium truncate">{device.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeDevice(device.id)}
+                        className="text-red-400 hover:text-red-300 text-xs shrink-0 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {availableDevices.length > 0 && (
+                <div className="flex gap-2">
+                  <select
+                    value={selectedDeviceId}
+                    onChange={(e) => setSelectedDeviceId(e.target.value)}
+                    className="input-field flex-1 text-sm"
+                  >
+                    <option value="">Select a device to add...</option>
+                    {availableDevices.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={addDevice}
+                    disabled={!selectedDeviceId}
+                    className="btn-ghost text-sm shrink-0 disabled:opacity-40"
+                  >
+                    Add
+                  </button>
+                </div>
+              )}
+              {assignedDevices.length === 0 && availableDevices.length === 0 && (
+                <p className="text-muted text-sm">No devices available to assign.</p>
+              )}
+            </>
+          )
+        })()}
       </section>
 
       {/* Photos */}
@@ -776,8 +874,8 @@ function SortableItemRow({ id, item, index, mode, allCases, onUpdate, onMoveToCa
           </select>
         )}
       </div>
-      <div className="flex items-center pt-1">
-        <button type="button" onClick={onRemove} className="text-red-400/60 hover:text-red-400 text-xs transition-colors" aria-label="Remove item">Remove</button>
+      <div className="flex items-center self-stretch pt-1">
+        <button type="button" onClick={onRemove} className="text-red-400 hover:text-red-300 text-xs transition-colors" aria-label="Remove item">Remove</button>
       </div>
     </div>
   )

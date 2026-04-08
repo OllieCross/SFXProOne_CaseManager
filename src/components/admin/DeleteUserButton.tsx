@@ -53,7 +53,7 @@ export default function DeleteUserButton({ userId, userName }: Props) {
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="text-xs text-muted hover:text-red-400 transition-colors"
+      className="text-xs text-red-400 hover:text-red-300 transition-colors"
       aria-label={`Delete user ${userName}`}
     >
       Delete

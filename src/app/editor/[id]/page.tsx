@@ -13,18 +13,24 @@ export default async function EditCasePage({ params }: { params: Promise<{ id: s
 
   const { id } = await params
 
-  const [caseData, allCases] = await Promise.all([
+  const [caseData, allCases, allDevices] = await Promise.all([
     prisma.case.findUnique({
       where: { id },
       include: {
         items: { orderBy: { sortOrder: 'asc' } },
         images: { orderBy: { createdAt: 'asc' } },
         documents: { orderBy: { createdAt: 'asc' } },
+        devices: { where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } },
       },
     }),
     prisma.case.findMany({
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
+    }),
+    prisma.device.findMany({
+      where: { deletedAt: null, OR: [{ caseId: null }, { caseId: id }] },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true },
     }),
   ])
 
@@ -68,6 +74,7 @@ export default async function EditCasePage({ params }: { params: Promise<{ id: s
     })),
     images,
     documents,
+    devices: caseData.devices,
   }
 
   return (
@@ -81,6 +88,7 @@ export default async function EditCasePage({ params }: { params: Promise<{ id: s
           isAdmin={isAdmin}
           initialData={initialData}
           allCases={allCases.filter((c) => c.id !== id)}
+          allDevices={allDevices}
         />
       </main>
     </>

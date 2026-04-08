@@ -4,6 +4,21 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.3.6 - 2026-04-08
+
+### Added
+
+- **Audit log - Item actions**: item creation, editing, and deletion are now recorded in the audit log (`ITEM_CREATED`, `ITEM_UPDATED`, `ITEM_DELETED`); item name shown as detail
+- **Audit log - Tank & Pyro labels**: all tank and pyro audit actions now have human-readable labels and detail text in the Admin Panel audit log view
+- **Case editor - Devices section**: cases can now have existing devices assigned directly from the Create Case and Edit Case forms; devices are listed with a remove option; unassigned devices appear in a dropdown; in edit mode changes are applied immediately, in create mode assignments are applied after the case is saved
+
+### Fixed
+
+- **Inventory page - gear list Remove button**: Remove button on gear list rows is now red by default (was only red on hover) and vertically centered within the row
+- **Confirmation modal - backdrop blur edge**: on desktop, a visible border appeared at the top of the page where the blurred backdrop ended; fixed by changing the backdrop from `absolute` to `fixed` positioning so it covers the full viewport including the header
+
+---
+
 ## v1.3.5 - 2026-04-08
 
 ### Added

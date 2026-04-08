@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { logAudit } from '@/lib/audit'
 import { z } from 'zod'
 
 const createSchema = z.object({
@@ -42,6 +43,8 @@ export async function POST(req: Request) {
       // caseId left null = standalone item
     },
   })
+
+  await logAudit('ITEM_CREATED', session.user.id, item.id, { itemName: item.name })
 
   return NextResponse.json(item, { status: 201 })
 }

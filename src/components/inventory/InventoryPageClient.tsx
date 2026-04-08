@@ -115,17 +115,15 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+      <h1 className="text-xl font-bold">Inventory</h1>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Inventory</h1>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/issues"
-            className="bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
-          >
-            Issues
-          </Link>
-          <QRGenerator />
-        </div>
+        <Link
+          href="/issues"
+          className="bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+        >
+          Issues
+        </Link>
+        <QRGenerator />
       </div>
 
       {/* FAB is fixed-position below */}
@@ -206,6 +204,30 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
         )}
       </section>
 
+      {/* Items outside Cases */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider flex items-center gap-2">
+          Items <span className="bg-foreground/10 text-foreground/70 text-xs font-semibold rounded-full px-2 py-0.5 normal-case">{filteredItems.length}</span>
+        </h2>
+        {filteredItems.length === 0 ? (
+          <p className="text-muted text-sm">{q ? 'No items match.' : 'No items outside cases yet.'}</p>
+        ) : (
+          <div className="space-y-2">
+            {filteredItems.map((item) => (
+              <Link key={item.id} href={`/items/${item.id}/edit`} className="card flex items-center justify-between gap-3 hover:bg-foreground/5 transition-colors">
+                <div className="min-w-0">
+                  <p className="font-medium text-sm truncate">{item.name}</p>
+                  <p className="text-xs text-muted">
+                    Qty: {item.quantity}{item.comment ? ` - ${item.comment}` : ''}
+                  </p>
+                </div>
+                <span className="text-muted text-xl shrink-0" aria-hidden>&#8250;</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* Consumables */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider flex items-center gap-2">
@@ -258,30 +280,6 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                 </Link>
               )
             })}
-          </div>
-        )}
-      </section>
-
-      {/* Items outside Cases */}
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted uppercase tracking-wider flex items-center gap-2">
-          Items <span className="bg-foreground/10 text-foreground/70 text-xs font-semibold rounded-full px-2 py-0.5 normal-case">{filteredItems.length}</span>
-        </h2>
-        {filteredItems.length === 0 ? (
-          <p className="text-muted text-sm">{q ? 'No items match.' : 'No items outside cases yet.'}</p>
-        ) : (
-          <div className="space-y-2">
-            {filteredItems.map((item) => (
-              <Link key={item.id} href={`/items/${item.id}/edit`} className="card flex items-center justify-between gap-3 hover:bg-foreground/5 transition-colors">
-                <div className="min-w-0">
-                  <p className="font-medium text-sm truncate">{item.name}</p>
-                  <p className="text-xs text-muted">
-                    Qty: {item.quantity}{item.comment ? ` - ${item.comment}` : ''}
-                  </p>
-                </div>
-                <span className="text-muted text-xl shrink-0" aria-hidden>&#8250;</span>
-              </Link>
-            ))}
           </div>
         )}
       </section>
@@ -354,7 +352,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                 fill = 0.5
               }
               return (
-                <Link key={p.id} href={`/pyro/${p.id}/edit`} className="card flex items-center justify-between gap-4 hover:bg-foreground/5 transition-colors">
+                <Link key={p.id} href={`/pyro/${p.id}`} className="card flex items-center justify-between gap-4 hover:bg-foreground/5 transition-colors">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       {isCritical && <span className="text-red-400 text-xs font-bold">!</span>}

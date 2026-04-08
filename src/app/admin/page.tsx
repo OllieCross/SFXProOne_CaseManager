@@ -16,6 +16,9 @@ const ACTION_LABEL: Record<string, string> = {
   IMAGE_DELETED:            'Deleted image',
   DOCUMENT_UPLOADED:        'Uploaded document',
   DOCUMENT_DELETED:         'Deleted document',
+  ITEM_CREATED:             'Created item',
+  ITEM_UPDATED:             'Updated item',
+  ITEM_DELETED:             'Deleted item',
   ITEM_MOVED:               'Moved item',
   ROLE_CHANGED:             'Changed role',
   DEVICE_CREATED:           'Created device',
@@ -31,6 +34,14 @@ const ACTION_LABEL: Record<string, string> = {
   EVENT_CREATED:            'Created event',
   EVENT_UPDATED:            'Updated event',
   EVENT_COMPLETED:          'Completed event',
+  TANK_CREATED:             'Created tank',
+  TANK_UPDATED:             'Updated tank',
+  TANK_DELETED:             'Deleted tank',
+  TANK_LOGBOOK_ENTRY_ADDED: 'Added tank logbook entry',
+  PYRO_CREATED:             'Created pyro effect',
+  PYRO_UPDATED:             'Updated pyro effect',
+  PYRO_DELETED:             'Deleted pyro effect',
+  PYRO_STOCK_ADJUSTED:      'Adjusted pyro stock',
 }
 
 function auditDetail(action: string, meta: Record<string, unknown> | null): string {
@@ -46,6 +57,9 @@ function auditDetail(action: string, meta: Record<string, unknown> | null): stri
     case 'DOCUMENT_UPLOADED':
     case 'DOCUMENT_DELETED':
       return (meta.title as string) ?? (meta.fileName as string) ?? ''
+    case 'ITEM_CREATED':
+    case 'ITEM_UPDATED':
+    case 'ITEM_DELETED':
     case 'ITEM_MOVED':
       return (meta.itemName as string) ?? ''
     case 'ROLE_CHANGED':
@@ -67,6 +81,16 @@ function auditDetail(action: string, meta: Record<string, unknown> | null): stri
     case 'EVENT_CREATED':
     case 'EVENT_UPDATED':
     case 'EVENT_COMPLETED':
+      return (meta.name as string) ?? ''
+    case 'TANK_CREATED':
+    case 'TANK_UPDATED':
+    case 'TANK_DELETED':
+    case 'TANK_LOGBOOK_ENTRY_ADDED':
+      return (meta.name as string) ?? ''
+    case 'PYRO_CREATED':
+    case 'PYRO_UPDATED':
+    case 'PYRO_DELETED':
+    case 'PYRO_STOCK_ADJUSTED':
       return (meta.name as string) ?? ''
     default:
       return ''
@@ -112,7 +136,6 @@ export default async function AdminPage() {
               <thead>
                 <tr className="border-b border-foreground/10 text-left text-gray-400">
                   <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Joined</th>
                   <th className="px-4 py-3 font-medium">Role</th>
                   <th className="px-4 py-3 font-medium"></th>
@@ -125,7 +148,6 @@ export default async function AdminPage() {
                     className={i < users.length - 1 ? 'border-b border-foreground/5' : ''}
                   >
                     <td className="px-4 py-3 font-medium">{user.name}</td>
-                    <td className="px-4 py-3 text-gray-400">{user.email}</td>
                     <td className="px-4 py-3 text-gray-400">{formatDate(user.createdAt)}</td>
                     <td className="px-4 py-3">
                       <RoleSelector
@@ -167,50 +189,32 @@ export default async function AdminPage() {
             }
             let lastLabel = ''
             return (
-              <div className="card overflow-hidden p-0 overflow-x-auto">
-                <table className="w-full text-sm min-w-[480px]">
-                  <thead>
-                    <tr className="border-b border-foreground/10 text-left text-gray-400">
-                      <th className="px-4 py-3 font-medium">When</th>
-                      <th className="px-4 py-3 font-medium">User</th>
-                      <th className="px-4 py-3 font-medium">Action</th>
-                      <th className="px-4 py-3 font-medium">Detail</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {auditLogs.map((log, i) => {
-                      const label = dayLabel(log.createdAt)
-                      const showLabel = label !== lastLabel
-                      lastLabel = label
-                      return (
-                        <>
-                          {showLabel && (
-                            <tr key={`label-${label}`}>
-                              <td colSpan={4} className="px-4 pt-3 pb-1 text-xs font-semibold text-muted uppercase tracking-wider bg-foreground/[0.02]">
-                                {label}
-                              </td>
-                            </tr>
-                          )}
-                          <tr
-                            key={log.id}
-                            className={i < auditLogs.length - 1 ? 'border-b border-foreground/5' : ''}
-                          >
-                            <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
-                              {log.createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                            </td>
-                            <td className="px-4 py-3 font-medium">{log.user.name}</td>
-                            <td className="px-4 py-3 text-gray-300">
-                              {ACTION_LABEL[log.action] ?? log.action}
-                            </td>
-                            <td className="px-4 py-3 text-gray-400 truncate max-w-[200px]">
-                              {auditDetail(log.action, log.meta as Record<string, unknown> | null)}
-                            </td>
-                          </tr>
-                        </>
-                      )
-                    })}
-                  </tbody>
-                </table>
+              <div className="space-y-1">
+                {auditLogs.map((log) => {
+                  const label = dayLabel(log.createdAt)
+                  const showLabel = label !== lastLabel
+                  lastLabel = label
+                  const detail = auditDetail(log.action, log.meta as Record<string, unknown> | null)
+                  const time = log.createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                  return (
+                    <>
+                      {showLabel && (
+                        <p key={`label-${label}`} className="text-xs font-semibold text-muted uppercase tracking-wider pt-3 pb-1 px-1">
+                          {label}
+                        </p>
+                      )}
+                      <div key={log.id} className="card py-2.5 px-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium truncate">{ACTION_LABEL[log.action] ?? log.action}</p>
+                          <p className="text-xs text-muted shrink-0">{time}</p>
+                        </div>
+                        <p className="text-xs text-muted mt-0.5">
+                          {log.user.name}{detail ? ` · ${detail}` : ''}
+                        </p>
+                      </div>
+                    </>
+                  )
+                })}
               </div>
             )
           })()}

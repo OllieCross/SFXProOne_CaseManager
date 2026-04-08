@@ -90,7 +90,7 @@ export default function QRGenerator() {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} className="btn-primary text-sm">
-        QR Generator
+        QR Code
       </button>
     )
   }

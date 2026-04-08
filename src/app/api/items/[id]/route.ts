@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { logAudit } from '@/lib/audit'
 import { z } from 'zod'
 
 const updateSchema = z.object({
@@ -24,6 +25,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   const item = await prisma.item.update({ where: { id }, data: parsed.data })
+  await logAudit('ITEM_UPDATED', session.user.id, item.id, { itemName: item.name })
   return NextResponse.json(item)
 }
 
@@ -40,5 +42,6 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   await prisma.item.update({ where: { id }, data: { deletedAt: new Date() } })
+  await logAudit('ITEM_DELETED', session.user.id, id, { itemName: item.name })
   return NextResponse.json({ ok: true })
 }
