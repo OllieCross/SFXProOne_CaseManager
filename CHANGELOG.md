@@ -4,6 +4,24 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.3.9 - 2026-04-08
+
+### Added
+
+- **Events - own crew tag green highlight**: the logged-in user's name tag on event cards is now green, making it easy to spot events you are assigned to
+
+### Fixed
+
+- **Recycle Bin - Empty button**: was only deleting items older than 7 days; now correctly empties all items in the bin regardless of age
+- **Device detail page - scroll position**: page was opening scrolled to the bottom due to `autoFocus` on the logbook comment input; removed `autoFocus`
+- **Inventory - device card border colors**: Lost now shows a black border, Retired a grey border, Rented a blue border (previously all three had no border color)
+
+### Changed
+
+- **Device status label**: "Rented to a Friend" shortened to "Rented" across all pages (inventory, device detail, case detail, event detail, event form, group form, device editor)
+
+---
+
 ## v1.3.8 - 2026-04-08
 
 ### Added

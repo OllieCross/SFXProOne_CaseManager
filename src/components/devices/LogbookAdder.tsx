@@ -73,7 +73,6 @@ export default function LogbookAdder({ deviceId, initialEntries }: Props) {
                 placeholder="e.g. Prism replaced"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                autoFocus
               />
             </div>
           </div>

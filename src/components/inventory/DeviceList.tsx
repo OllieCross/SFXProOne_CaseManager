@@ -8,7 +8,7 @@ const STATUS_LABELS: Record<string, string> = {
   InRepair: 'In Repair',
   Retired: 'Retired',
   Lost: 'Lost',
-  RentedToFriend: 'Rented to Friend',
+  RentedToFriend: 'Rented',
 }
 
 const STATUS_COLORS: Record<string, string> = {

@@ -59,7 +59,7 @@ type Props = {
 
 const STATUS_LABELS: Record<string, string> = {
   Working: 'Working', Faulty: 'Faulty', InRepair: 'In Repair',
-  Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented to Friend',
+  Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented',
 }
 
 const EVENT_STATUSES = ['Planned', 'Confirmed', 'Completed', 'Cancelled', 'NeedsDetails'] as const
@@ -364,7 +364,7 @@ export default function EventForm({
           <input type="text" className="input-field" placeholder="e.g. Vienna, Austria"
             value={location} onChange={(e) => setLocation(e.target.value)} />
         </div>
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-2 gap-6">
           <div className="flex flex-col">
             <label className="block text-sm font-medium mb-1.5">Start Date *</label>
             <input type="date" required className="input-field h-[42px] appearance-none" value={startDateVal} onChange={(e) => setStartDateVal(e.target.value)} />

@@ -6,7 +6,7 @@ import QRGenerator from '@/components/editor/QRGenerator'
 
 const STATUS_LABELS: Record<string, string> = {
   Working: 'Working', Faulty: 'Faulty', InRepair: 'In Repair',
-  Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented to Friend',
+  Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented',
 }
 const STATUS_COLORS: Record<string, string> = {
   Working: 'text-green-400', Faulty: 'text-red-400', InRepair: 'text-yellow-400',
@@ -185,7 +185,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
         ) : (
           <div className="space-y-2">
             {filteredDevices.map((d) => {
-              const borderColor = d.status === 'Faulty' || d.status === 'Lost' ? 'border-l-red-600' : d.status === 'InRepair' ? 'border-l-yellow-500' : d.status === 'Working' ? 'border-l-green-600' : 'border-l-transparent'
+              const borderColor = d.status === 'Faulty' ? 'border-l-red-500' : d.status === 'InRepair' ? 'border-l-yellow-500' : d.status === 'Working' ? 'border-l-green-600' : d.status === 'Lost' ? 'border-l-black' : d.status === 'Retired' ? 'border-l-gray-500' : d.status === 'RentedToFriend' ? 'border-l-blue-400' : 'border-l-transparent'
               return (
                 <Link key={d.id} href={`/devices/${d.id}`} className={`card flex items-center justify-between gap-4 border-l-[3px] ${borderColor} hover:bg-foreground/5 transition-colors`}>
                   <div className="min-w-0">

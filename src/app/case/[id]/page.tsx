@@ -61,7 +61,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
 
   const STATUS_LABELS: Record<string, string> = {
     Working: 'Working', Faulty: 'Faulty', InRepair: 'In Repair',
-    Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented to a Friend',
+    Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented',
   }
   const STATUS_COLORS: Record<string, string> = {
     Working: 'text-green-400', Faulty: 'text-red-400', InRepair: 'text-yellow-400',

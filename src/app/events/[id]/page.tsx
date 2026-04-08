@@ -27,7 +27,7 @@ const COMPOUND_LABELS: Record<string, string> = {
 
 const DEVICE_STATUS_LABELS: Record<string, string> = {
   Working: 'Working', Faulty: 'Faulty', InRepair: 'In Repair',
-  Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented to Friend',
+  Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented',
 }
 
 function formatDateTime(d: Date) {

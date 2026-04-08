@@ -153,7 +153,7 @@ const STATUS_LABELS: Record<DeviceStatus, string> = {
   InRepair: 'In Repair',
   Retired: 'Retired',
   Lost: 'Lost',
-  RentedToFriend: 'Rented to a Friend',
+  RentedToFriend: 'Rented',
 }
 
 // ---------- Component ----------

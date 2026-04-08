@@ -31,7 +31,7 @@ type Props = {
 
 const STATUS_LABELS: Record<string, string> = {
   Working: 'Working', Faulty: 'Faulty', InRepair: 'In Repair',
-  Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented to Friend',
+  Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented',
 }
 
 export default function GroupForm({ mode, groupId, initialData, allCases, allDevices, allItems, allConsumables }: Props) {
