@@ -16,7 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
   Faulty: 'text-red-400',
   InRepair: 'text-yellow-400',
   Retired: 'text-muted',
-  Lost: 'text-red-600',
+  Lost: 'text-black dark:text-white',
   RentedToFriend: 'text-blue-400',
 }
 
@@ -42,11 +42,11 @@ export default function DeviceList({ devices, canEdit }: Props) {
   return (
     <div className="space-y-2">
       {devices.map((d) => {
-        const borderColor = d.status === 'Faulty' || d.status === 'Lost' ? 'border-l-red-600' : d.status === 'InRepair' ? 'border-l-yellow-500' : d.status === 'Working' ? 'border-l-green-600' : 'border-l-transparent'
+        const borderColor = d.status === 'Faulty' ? 'border-l-red-600' : d.status === 'Lost' ? 'border-l-black dark:border-l-white' : d.status === 'InRepair' ? 'border-l-yellow-500' : d.status === 'Working' ? 'border-l-green-600' : 'border-l-transparent'
         return (
         <div key={d.id} className={`card flex items-center justify-between gap-4 border-l-[3px] ${borderColor}`}>
           <div className="min-w-0">
-            <p className="font-medium text-sm truncate">{d.name}</p>
+            <p className="font-medium text-sm break-words">{d.name}</p>
             <p className="text-xs mt-0.5">
               <span className={STATUS_COLORS[d.status] ?? 'text-muted'}>{STATUS_LABELS[d.status] ?? d.status}</span>
               <span className="text-muted"> &middot; {d._count.images} photos &middot; {d._count.documents} docs &middot; {d._count.logbook} log entries</span>

@@ -197,7 +197,7 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
                   <div key={entry.id} className="py-3 first:pt-0 last:pb-0">
                     <p className="text-sm">{entry.comment}</p>
                     <p className="text-muted text-xs mt-0.5">
-                      {formatDate(entry.date)} &middot; {entry.user.name}
+                      {formatDate(entry.date)} &middot; {entry.user?.name ?? 'Deleted user'}
                     </p>
                   </div>
                 ))}

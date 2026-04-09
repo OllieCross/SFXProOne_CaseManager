@@ -53,8 +53,21 @@ export default function QRScanner({ onScan }: Props) {
   }, [onScan])
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       <div id="qr-reader" className="w-full" />
+      {/* Crosshair overlay */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="relative w-48 h-48">
+          {/* Top-left */}
+          <span className="absolute top-0 left-0 w-7 h-7 border-t-[3px] border-l-[3px] border-white rounded-tl-sm" />
+          {/* Top-right */}
+          <span className="absolute top-0 right-0 w-7 h-7 border-t-[3px] border-r-[3px] border-white rounded-tr-sm" />
+          {/* Bottom-left */}
+          <span className="absolute bottom-0 left-0 w-7 h-7 border-b-[3px] border-l-[3px] border-white rounded-bl-sm" />
+          {/* Bottom-right */}
+          <span className="absolute bottom-0 right-0 w-7 h-7 border-b-[3px] border-r-[3px] border-white rounded-br-sm" />
+        </div>
+      </div>
     </div>
   )
 }

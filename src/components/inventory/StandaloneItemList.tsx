@@ -22,7 +22,7 @@ export default function StandaloneItemList({ items, canEdit }: Props) {
       {items.map((item) => (
         <div key={item.id} className="card flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-medium text-sm truncate">{item.name}</p>
+            <p className="font-medium text-sm break-words">{item.name}</p>
             <p className="text-xs text-muted">
               Qty: {item.quantity}
               {item.comment ? ` - ${item.comment}` : ''}

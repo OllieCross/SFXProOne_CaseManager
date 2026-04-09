@@ -52,7 +52,6 @@ export default async function EventsPage() {
         ) : (
           <EventsPageClient
             events={serialized}
-            canEdit={canEdit}
             userId={session.user.id}
             todayISO={todayStart.toISOString()}
             tomorrowISO={tomorrowEnd.toISOString()}

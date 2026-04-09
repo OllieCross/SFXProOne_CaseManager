@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Header from '@/components/layout/Header'
 import EventForm from '@/components/forms/EventForm'
+import DeleteEventButton from '@/components/events/DeleteEventButton'
 
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -53,7 +54,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
     })),
     ...event.cases.map((ec) => ({ type: 'case' as const, id: ec.case.id, name: ec.case.name })),
     ...event.devices.map((ed) => ({ type: 'device' as const, id: ed.device.id, name: ed.device.name, status: ed.device.status })),
-    ...event.items.map((ei) => ({ type: 'item' as const, id: ei.item.id, name: ei.item.name, quantity: ei.item.quantity })),
+    ...event.items.map((ei) => ({ type: 'item' as const, id: ei.item.id, name: ei.item.name, quantity: ei.quantityNeeded })),
     ...event.consumables.map((ec) => ({
       type: 'consumable' as const,
       id: ec.consumable.id,
@@ -107,6 +108,9 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
           allPyros={allPyros}
           allGroups={allGroups}
         />
+        <div className="mt-2">
+          <DeleteEventButton eventId={id} eventName={event.name} />
+        </div>
       </main>
     </>
   )

@@ -123,7 +123,8 @@ export default function EventForm({
   // Inventory picker
   const [invType, setInvType] = useState<'case' | 'device' | 'item' | 'consumable' | 'tank' | 'pyro'>('case')
   const [invId, setInvId] = useState('')
-  const [invQty, setInvQty] = useState(1)
+  const [invQtyRaw, setInvQtyRaw] = useState('1')
+  const [invQtyError, setInvQtyError] = useState('')
   const [invSearch, setInvSearch] = useState('')
 
   // Group picker
@@ -158,9 +159,36 @@ export default function EventForm({
     setCrewId('')
   }
 
+  function parseInvQty(): number | null {
+    if (invType !== 'consumable' && invType !== 'item' && invType !== 'pyro') return null
+    const normalized = invQtyRaw.replace(',', '.')
+    const num = Number(normalized)
+    if (!Number.isFinite(num) || num < 0) return null
+    if (invType === 'item' || invType === 'pyro') {
+      if (!Number.isInteger(num)) return null
+      return num
+    }
+    // consumable: up to 2 decimal places
+    if (!/^\d+([.,]\d{1,2})?$/.test(invQtyRaw.trim())) return null
+    return num
+  }
+
   function addInventory() {
     if (!invId) return
     if (isMember(invType, invId)) return
+
+    let qty: number | null = null
+    if (invType === 'item' || invType === 'consumable' || invType === 'pyro') {
+      qty = parseInvQty()
+      if (qty === null) {
+        const hint = invType === 'consumable'
+          ? 'Enter a valid non-negative number (up to 2 decimal places).'
+          : 'Enter a valid non-negative whole number.'
+        setInvQtyError(hint)
+        return
+      }
+      setInvQtyError('')
+    }
 
     let member: EventMember
     if (invType === 'case') {
@@ -174,11 +202,11 @@ export default function EventForm({
     } else if (invType === 'item') {
       const opt = allItems.find((i) => i.id === invId)
       if (!opt) return
-      member = { type: 'item', id: opt.id, name: opt.name, quantity: invQty }
+      member = { type: 'item', id: opt.id, name: opt.name, quantity: qty! }
     } else if (invType === 'consumable') {
       const opt = allConsumables.find((c) => c.id === invId)
       if (!opt) return
-      member = { type: 'consumable', id: opt.id, name: opt.name, unit: opt.unit, quantityNeeded: invQty }
+      member = { type: 'consumable', id: opt.id, name: opt.name, unit: opt.unit, quantityNeeded: qty! }
     } else if (invType === 'tank') {
       const opt = allTanks.find((t) => t.id === invId)
       if (!opt) return
@@ -186,13 +214,14 @@ export default function EventForm({
     } else {
       const opt = allPyros.find((p) => p.id === invId)
       if (!opt) return
-      member = { type: 'pyro', id: opt.id, name: opt.name, category: opt.category, quantity: invQty }
+      member = { type: 'pyro', id: opt.id, name: opt.name, category: opt.category, quantity: qty! }
     }
 
     setMembers((prev) => [...prev, member])
-    if (mode === 'edit') patchMember('add', invType, invId, invType === 'consumable' || invType === 'pyro' ? invQty : undefined)
+    if (mode === 'edit') patchMember('add', invType, invId, invType === 'consumable' || invType === 'item' || invType === 'pyro' ? qty! : undefined)
     setInvId('')
-    setInvQty(1)
+    setInvQtyRaw('1')
+    setInvQtyError('')
     setInvSearch('')
   }
 
@@ -308,7 +337,7 @@ export default function EventForm({
                 action: 'add',
                 type: m.type,
                 memberId: m.id,
-                quantityNeeded: m.type === 'consumable' ? m.quantityNeeded : undefined,
+                quantityNeeded: m.type === 'consumable' ? m.quantityNeeded : m.type === 'item' ? m.quantity : m.type === 'pyro' ? m.quantity : undefined,
               }),
             })
           )
@@ -487,7 +516,7 @@ export default function EventForm({
               <button
                 key={t}
                 type="button"
-                onClick={() => { setInvType(t); setInvId(''); setInvSearch('') }}
+                onClick={() => { setInvType(t); setInvId(''); setInvSearch(''); setInvQtyRaw('1'); setInvQtyError('') }}
                 className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${invType === t ? 'border-brand text-brand' : 'border-foreground/10 text-muted hover:text-foreground'}`}
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -505,7 +534,7 @@ export default function EventForm({
           />
 
           {/* Picker row */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <select className="input-field flex-1" value={invId} onChange={(e) => setInvId(e.target.value)}>
               <option value="">-- Select {invType} --</option>
               {(invOptions as Array<{ id: string; name: string; status?: string; unit?: string }>).map((opt) => (
@@ -517,12 +546,19 @@ export default function EventForm({
               ))}
             </select>
             {(invType === 'consumable' || invType === 'item' || invType === 'pyro') && (
-              <input
-                type="number" min={invType === 'item' ? 1 : 0.01} step={invType === 'item' ? 1 : '0.01'} className="input-field w-24" placeholder="Qty"
-                value={invQty} onChange={(e) => setInvQty(invType === 'item' ? parseInt(e.target.value) || 1 : parseFloat(e.target.value) || 1)}
-              />
+              <div className="flex flex-col gap-1">
+                <input
+                  type="text"
+                  inputMode={invType === 'consumable' ? 'decimal' : 'numeric'}
+                  className={`input-field w-24 ${invQtyError ? 'border-red-500' : ''}`}
+                  placeholder="Qty"
+                  value={invQtyRaw}
+                  onChange={(e) => { setInvQtyRaw(e.target.value); setInvQtyError('') }}
+                />
+                {invQtyError && <p className="text-red-400 text-xs">{invQtyError}</p>}
+              </div>
             )}
-            <button type="button" onClick={addInventory} disabled={!invId} className="btn-primary text-sm shrink-0">
+            <button type="button" onClick={addInventory} disabled={!invId} className="btn-primary text-sm shrink-0 self-start">
               Add
             </button>
           </div>

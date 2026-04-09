@@ -59,7 +59,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
       stagehands: { include: { user: { select: { id: true, name: true } } } },
       cases: { include: { case: { select: { id: true, name: true, qrdata: true } } } },
       devices: { include: { device: { select: { id: true, name: true, status: true } } } },
-      items: { include: { item: { select: { id: true, name: true, quantity: true, comment: true } } } },
+      items: { include: { item: { select: { id: true, name: true, comment: true } } } },
       consumables: { include: { consumable: { select: { id: true, name: true, unit: true } } } },
       tanks: { include: { tank: { select: { id: true, name: true, unit: true, chemicalCompound: true } } } },
       pyros: { include: { pyro: { select: { id: true, name: true, category: true } } } },
@@ -164,9 +164,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           <section className="space-y-2">
             <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Items ({event.items.length})</h2>
             <div className="space-y-1">
-              {event.items.map(({ item }) => (
+              {event.items.map(({ item, quantityNeeded }) => (
                 <div key={item.id} className="card py-2 px-3">
-                  <p className="text-sm">{item.name} <span className="text-muted">x{item.quantity}</span></p>
+                  <p className="text-sm">{item.name} <span className="text-muted">x{quantityNeeded}</span></p>
                   {item.comment && <p className="text-xs text-muted">{item.comment}</p>}
                 </div>
               ))}

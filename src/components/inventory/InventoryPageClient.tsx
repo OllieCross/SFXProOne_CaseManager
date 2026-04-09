@@ -153,7 +153,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
             {filteredCases.map((c) => (
               <Link key={c.id} href={`/case/${c.id}`} className="card flex items-center justify-between gap-4 hover:bg-foreground/5 transition-colors">
                 <div className="min-w-0">
-                  <p className="font-medium text-sm truncate">{c.name}</p>
+                  <p className="font-medium text-sm break-words">{c.name}</p>
                   <p className="text-muted text-xs mt-0.5">
                     {[
                       c._count.items > 0 && `${c._count.items} item${c._count.items !== 1 ? 's' : ''}`,
@@ -189,7 +189,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
               return (
                 <Link key={d.id} href={`/devices/${d.id}`} className={`card flex items-center justify-between gap-4 border-l-[3px] ${borderColor} hover:bg-foreground/5 transition-colors`}>
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{d.name}</p>
+                    <p className="font-medium text-sm break-words">{d.name}</p>
                     <p className="text-xs mt-0.5">
                       <span className={STATUS_COLORS[d.status] ?? 'text-muted'}>{STATUS_LABELS[d.status] ?? d.status}</span>
                       <span className="text-muted"> &middot; {d._count.images} photos &middot; {d._count.documents} docs &middot; {d._count.logbook} log entries</span>
@@ -216,7 +216,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
             {filteredItems.map((item) => (
               <Link key={item.id} href={`/items/${item.id}/edit`} className="card flex items-center justify-between gap-3 hover:bg-foreground/5 transition-colors">
                 <div className="min-w-0">
-                  <p className="font-medium text-sm truncate">{item.name}</p>
+                  <p className="font-medium text-sm break-words">{item.name}</p>
                   <p className="text-xs text-muted">
                     Qty: {item.quantity}{item.comment ? ` - ${item.comment}` : ''}
                   </p>
@@ -264,7 +264,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       {isCritical && <span className="text-red-400 text-xs font-bold">!</span>}
-                      <p className="font-medium text-sm truncate">{c.name}</p>
+                      <p className="font-medium text-sm break-words">{c.name}</p>
                     </div>
                     <div className="flex items-center gap-2 mt-1.5">
                       <div className="flex-1 h-1.5 rounded-full bg-foreground/10 overflow-hidden">
@@ -302,7 +302,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                 <Link key={tank.id} href={`/tanks/${tank.id}`} className="card flex items-center justify-between gap-4 hover:bg-foreground/5 transition-colors">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <p className="font-medium text-sm truncate">{tank.name}</p>
+                      <p className="font-medium text-sm break-words">{tank.name}</p>
                       <span className="text-xs text-muted shrink-0">{COMPOUND_LABELS[tank.chemicalCompound] ?? tank.chemicalCompound}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-1.5">
@@ -356,7 +356,7 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       {isCritical && <span className="text-red-400 text-xs font-bold">!</span>}
-                      <p className="font-medium text-sm truncate">{p.name}</p>
+                      <p className="font-medium text-sm break-words">{p.name}</p>
                       <span className="text-xs text-muted shrink-0">{p.category}{p.brand ? ` - ${p.brand}` : ''}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-1.5">

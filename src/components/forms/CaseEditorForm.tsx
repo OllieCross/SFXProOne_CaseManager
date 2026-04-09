@@ -206,11 +206,13 @@ export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, all
   const imageInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const docInputRef = useRef<HTMLInputElement>(null)
+  const gearListEndRef = useRef<HTMLDivElement>(null)
 
   // ---------- Items ----------
 
   function addItem() {
     setItems((prev) => [...prev, { name: '', quantity: 1, comment: '', sortOrder: prev.length }])
+    setTimeout(() => gearListEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50)
   }
 
   function updateItem(index: number, field: keyof ItemRow, value: string | number) {
@@ -554,6 +556,7 @@ export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, all
             </div>
           </SortableContext>
         </DndContext>
+        <div ref={gearListEndRef} />
       </section>
 
       {/* Devices */}

@@ -6,7 +6,7 @@ type LogbookEntry = {
   id: string
   date: string | Date
   comment: string
-  user: { name: string }
+  user: { name: string } | null
 }
 
 type Props = {
@@ -101,7 +101,7 @@ export default function LogbookAdder({ deviceId, initialEntries }: Props) {
             <div key={entry.id} className="py-3 first:pt-0 last:pb-0">
               <p className="text-sm">{entry.comment}</p>
               <p className="text-muted text-xs mt-0.5">
-                {(() => { const d = new Date(entry.date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}` })()} &middot; {entry.user.name}
+                {(() => { const d = new Date(entry.date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}` })()} &middot; {entry.user?.name ?? 'Deleted user'}
               </p>
             </div>
           ))}

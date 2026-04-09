@@ -48,8 +48,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     } else if (type === 'item') {
       await prisma.eventItem.upsert({
         where: { eventId_itemId: { eventId, itemId: memberId } },
-        create: { eventId, itemId: memberId },
-        update: {},
+        create: { eventId, itemId: memberId, quantityNeeded: Math.max(1, Math.round(quantityNeeded ?? 1)) },
+        update: { quantityNeeded: Math.max(1, Math.round(quantityNeeded ?? 1)) },
       })
     } else if (type === 'consumable') {
       await prisma.eventConsumable.upsert({

@@ -215,9 +215,9 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
 
         {/* Footer meta */}
         <p className="text-muted text-xs">
-          Added by {caseData.createdBy.name} on {formatDate(caseData.createdAt)}
+          Added by {caseData.createdBy?.name ?? 'Deleted user'} on {formatDate(caseData.createdAt)}
           {caseData.updatedBy && (
-            <> &middot; Updated by {caseData.updatedBy.name} on {formatDate(caseData.updatedAt)}</>
+            <> &middot; Updated by {caseData.updatedBy?.name ?? 'Deleted user'} on {formatDate(caseData.updatedAt)}</>
           )}
         </p>
       </main>

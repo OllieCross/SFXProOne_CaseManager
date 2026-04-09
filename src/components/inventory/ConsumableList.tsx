@@ -25,7 +25,7 @@ export default function ConsumableList({ consumables, canEdit }: Props) {
       {consumables.map((c) => (
         <div key={c.id} className="card flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="font-medium text-sm truncate">{c.name}</p>
+            <p className="font-medium text-sm break-words">{c.name}</p>
             <p className="text-muted text-xs mt-0.5">
               {c.stockQuantity} {c.unit} in stock
               {c.notes && <> &middot; {c.notes}</>}

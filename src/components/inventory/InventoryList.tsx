@@ -11,7 +11,7 @@ type Case = {
   name: string
   items: Item[]
   _count: { items: number; images: number; documents: number }
-  createdBy: { name: string }
+  createdBy: { name: string } | null
 }
 
 type Props = {
@@ -63,13 +63,13 @@ export default function InventoryList({ cases, canEdit }: Props) {
           {filtered.map((c) => (
             <div key={c.id} className="card flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="font-medium text-sm truncate">{c.name}</p>
+                <p className="font-medium text-sm break-words">{c.name}</p>
                 <p className="text-muted text-xs mt-0.5">
                   {[
                     c._count.items > 0 && `${c._count.items} items`,
                     c._count.images > 0 && `${c._count.images} photos`,
                     c._count.documents > 0 && `${c._count.documents} docs`,
-                    `by ${c.createdBy.name}`,
+                    `by ${c.createdBy?.name ?? 'Deleted user'}`,
                   ].filter(Boolean).join(' · ')}
                 </p>
                 {c.matchedItems.length > 0 && (

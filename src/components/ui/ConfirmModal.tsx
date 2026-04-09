@@ -25,7 +25,7 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Delete', 
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
 
       {/* Dialog */}
-      <div className="relative bg-surface border border-foreground/10 rounded-xl p-6 w-full max-w-sm shadow-xl">
+      <div className="relative bg-surface border border-foreground/10 rounded-xl p-6 w-full max-w-sm shadow-xl text-left">
         <h2 className="text-base font-semibold mb-2">{title}</h2>
         <p className="text-sm text-muted mb-6">{message}</p>
         <div className="flex justify-end gap-3">

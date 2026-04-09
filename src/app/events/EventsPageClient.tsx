@@ -33,7 +33,6 @@ type EventRow = {
 
 type Props = {
   events: EventRow[]
-  canEdit: boolean
   userId: string
   todayISO: string
   tomorrowISO: string
@@ -50,7 +49,7 @@ function formatStartDateTime(iso: string) {
 
 type FilterOption = 'all' | 'upcoming' | 'completed'
 
-export default function EventsPageClient({ events, canEdit, userId, todayISO, tomorrowISO }: Props) {
+export default function EventsPageClient({ events, userId, todayISO, tomorrowISO }: Props) {
   const todayStart = new Date(todayISO).getTime()
   const tomorrowEnd = new Date(tomorrowISO).getTime()
   const [filter, setFilter] = useState<FilterOption>('all')
@@ -122,12 +121,12 @@ export default function EventsPageClient({ events, canEdit, userId, todayISO, to
             } : undefined}
           >
             {/* Full-card tap target */}
-            <Link href={canEdit ? `/events/${event.id}/edit` : `/events/${event.id}`} className="absolute inset-0 rounded-xl" aria-label={`View ${event.name}`} />
+            <Link href={`/events/${event.id}`} className="absolute inset-0 rounded-xl" aria-label={`View ${event.name}`} />
 
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="font-medium truncate">{event.name}</p>
-                <p className="text-sm text-muted truncate">{event.venueName}{event.location ? ` - ${event.location}` : ''}</p>
+                <p className="font-medium break-words">{event.name}</p>
+                <p className="text-sm text-muted break-words">{event.venueName}{event.location ? ` - ${event.location}` : ''}</p>
               </div>
               <span className="text-muted shrink-0 text-lg leading-none">&rsaquo;</span>
             </div>

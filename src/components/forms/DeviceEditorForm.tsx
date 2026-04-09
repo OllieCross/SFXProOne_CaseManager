@@ -41,7 +41,7 @@ type LogbookRow = {
   id: string
   date: string
   comment: string
-  user: { name: string }
+  user: { name: string } | null
 }
 
 type PendingImage = { file: File; previewUrl: string }
@@ -645,7 +645,7 @@ export default function DeviceEditorForm({ mode, deviceId, initialData, allCases
                   <div className="min-w-0">
                     <p className="text-sm">{entry.comment}</p>
                     <p className="text-muted text-xs mt-0.5">
-                      {(() => { const d = new Date(entry.date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}` })()} &middot; {entry.user.name}
+                      {(() => { const d = new Date(entry.date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}` })()} &middot; {entry.user?.name ?? 'Deleted user'}
                     </p>
                   </div>
                   <button

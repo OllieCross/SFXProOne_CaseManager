@@ -6,6 +6,8 @@ import Header from '@/components/layout/Header'
 import RoleSelector from '@/components/admin/RoleSelector'
 import CreateUserButton from '@/components/admin/CreateUserButton'
 import DeleteUserButton from '@/components/admin/DeleteUserButton'
+import ClearAuditLogsButton from '@/components/admin/ClearAuditLogsButton'
+import LocalTime from '@/components/ui/LocalTime'
 import { formatDate } from '@/lib/utils'
 
 const ACTION_LABEL: Record<string, string> = {
@@ -175,7 +177,10 @@ export default async function AdminPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold mb-1">Audit Log</h2>
+          <div className="flex items-center justify-between gap-3 mb-1">
+            <h2 className="text-lg font-semibold">Audit Log</h2>
+            <ClearAuditLogsButton />
+          </div>
           <p className="text-sm text-gray-400 mb-4">Last 100 events, most recent first.</p>
 
           {auditLogs.length === 0 ? (
@@ -201,7 +206,6 @@ export default async function AdminPage() {
                   const showLabel = label !== lastLabel
                   lastLabel = label
                   const detail = auditDetail(log.action, log.meta as Record<string, unknown> | null)
-                  const time = log.createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
                   return (
                     <>
                       {showLabel && (
@@ -212,10 +216,10 @@ export default async function AdminPage() {
                       <div key={log.id} className="card py-2.5 px-3">
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-sm font-medium truncate">{ACTION_LABEL[log.action] ?? log.action}</p>
-                          <p className="text-xs text-muted shrink-0">{time}</p>
+                          <p className="text-xs text-muted shrink-0"><LocalTime iso={log.createdAt.toISOString()} /></p>
                         </div>
                         <p className="text-xs text-muted mt-0.5">
-                          {log.user.name}{detail ? ` · ${detail}` : ''}
+                          {log.user?.name ?? 'Deleted user'}{detail ? ` · ${detail}` : ''}
                         </p>
                       </div>
                     </>

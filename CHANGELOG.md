@@ -4,11 +4,38 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.3.12 - 2026-04-09
+
+### Added
+
+- **Events - delete event button**: edit event page now has a "Delete Event" button at the bottom with a confirmation modal, consistent with the rest of the app
+- **Admin - clear audit logs**: audit log section now has a "Clear Logs" button that deletes all log entries after confirmation
+- **QR scanner - crosshair overlay**: camera view now shows four corner brackets to help frame the QR code
+- **Audit log - local time**: log entry times are now formatted in the browser's local timezone, fixing times appearing 2 hours behind for UTC+2 users
+
+### Fixed
+
+- **Events - card tap navigation**: tapping an event card now always opens the event detail page; editors access the edit page via the pencil button already present on the detail page (previously editors were taken directly to edit, bypassing the detail view)
+- **Events - item quantity in detail**: event detail page was showing the item's total stock quantity instead of the quantity requested for the event; now correctly shows the per-event quantity
+- **Events - qty input field**: quantity input in the event create/edit form can now be fully cleared before typing a new value; input is validated only when the Add button is tapped; items and pyros require a non-negative integer; consumables accept non-negative numbers with up to two decimal places and accept both `.` and `,` as the decimal separator
+- **Inventory - title overflow**: long case, device, item, consumable, tank and pyro names now wrap to a new line instead of overflowing horizontally outside the card
+- **Events - event title overflow**: long event names and venue names on the events list now wrap instead of overflowing
+- **Inventory - Device "Lost" styling**: Lost devices now show a black left border and black status label in light mode (was incorrectly showing red, same as Faulty)
+- **Edit case - scroll on add item**: tapping "+ Add Item" now automatically scrolls to the newly added row at the bottom of the gear list
+- **User deletion**: deleting a user who has created cases, logbook entries, issues, audit logs or tanks no longer fails with a foreign key constraint error; all references to the deleted user across the app now display "Deleted user"
+
+### Changed
+
+- **Database - EventItem quantity**: `EventItem` now stores a `quantityNeeded` field (default 1) so per-event item quantities are persisted independently of the item's total stock quantity
+
+---
+
 ## v1.3.11 - 2026-04-09
 
 ### Fixed
 
 - **Admin - delete user**: clicking Delete now opens a confirmation modal (consistent with the rest of the app) instead of spawning inline confirm/cancel buttons; confirming the modal correctly calls the API and removes the user
+- **Admin - delete user modal**: modal text was right-aligned due to inheriting the `text-right` table cell style; fixed by anchoring `text-left` on the modal dialog itself
 
 ---
 
