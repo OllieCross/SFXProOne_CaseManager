@@ -9,7 +9,7 @@ export default async function IssuesPage() {
   const session = await auth()
   if (!session) redirect('/login')
 
-  const [faultyDevices, manualIssues, allDevices, allCases, allItems] = await Promise.all([
+  const [faultyDevices, manualIssues, allCases, allItems] = await Promise.all([
     prisma.device.findMany({
       where: { status: { in: ['Faulty', 'InRepair'] }, deletedAt: null },
       orderBy: { name: 'asc' },
@@ -30,9 +30,8 @@ export default async function IssuesPage() {
         item: { select: { id: true, name: true } },
       },
     }),
-    prisma.device.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
     prisma.case.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
-    prisma.item.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
+    prisma.item.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, caseId: true } }),
   ])
 
   const STATUS_LABELS: Record<string, string> = {
@@ -61,9 +60,8 @@ export default async function IssuesPage() {
       case: i.case,
       item: i.item,
     })),
-    allDevices,
     allCases,
-    allItems,
+    allItems: allItems.map(i => ({ id: i.id, name: i.name, caseId: i.caseId })),
   }
 
   return (

@@ -4,6 +4,22 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.4.0 - 2026-04-09
+
+### Added
+
+- **Issues - item in a case**: issue report form now has an "Item in a case" option that first shows a case dropdown, then an item dropdown filtered to items belonging to that case; makes it possible to report an issue against a cased item specifically
+- **Edit case - move item to standalone**: the "Move to..." dropdown on each gear item now includes a "No case (standalone)" option, allowing an item to be moved out of all cases entirely; previously only moving to another case was possible
+
+### Changed
+
+- **Issues - form type selector**: label changed from "What are you reporting an issue with?" to "Type"
+- **Issues - removed Device option**: "A device" has been removed from the issue type dropdown; device issues are tracked via device logbook entries and the Faulty/In Repair section on the Issues page
+- **Issues - Item option**: the "Item" type now only lists standalone items (not assigned to any case); items inside a case are reachable via the new "Item in a case" option
+- **Events - device picker**: device dropdown in the event create/edit form now only lists devices that are not assigned to any case
+
+---
+
 ## v1.3.13 - 2026-04-09
 
 ### Fixed

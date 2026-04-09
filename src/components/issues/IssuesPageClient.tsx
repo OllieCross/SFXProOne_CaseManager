@@ -16,44 +16,43 @@ type ManualIssue = {
   item: { id: string; name: string } | null
 }
 type EntityOption = { id: string; name: string }
+type ItemOption = { id: string; name: string; caseId: string | null }
 
 type Props = {
   faultyDevices: FaultyDevice[]
   manualIssues: ManualIssue[]
-  allDevices: EntityOption[]
   allCases: EntityOption[]
-  allItems: EntityOption[]
+  allItems: ItemOption[]
 }
 
-type EntityType = 'device' | 'case' | 'item' | 'other'
+type EntityType = 'item' | 'item_in_case' | 'case' | 'other'
 
-export default function IssuesPageClient({ faultyDevices, manualIssues: initialIssues, allDevices, allCases, allItems }: Props) {
+export default function IssuesPageClient({ faultyDevices, manualIssues: initialIssues, allCases, allItems }: Props) {
   const router = useRouter()
   const [issues, setIssues] = useState<ManualIssue[]>(initialIssues)
   const [showForm, setShowForm] = useState(false)
-  const [entityType, setEntityType] = useState<EntityType>('device')
+  const [entityType, setEntityType] = useState<EntityType>('item')
   const [entityId, setEntityId] = useState('')
+  const [selectedCaseId, setSelectedCaseId] = useState('')
   const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const entityOptions =
-    entityType === 'device' ? allDevices :
-    entityType === 'case' ? allCases :
-    entityType === 'item' ? allItems : []
+  const standaloneItems = allItems.filter(i => i.caseId === null)
+  const caseItems = allItems.filter(i => i.caseId === selectedCaseId)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (entityType !== 'other' && !entityId) { setError('Please select an entity'); return }
+    if (entityType === 'item_in_case' && !selectedCaseId) { setError('Please select a case'); return }
     setError('')
     setSubmitting(true)
     try {
       const body: Record<string, string | boolean> = { description }
-      if (entityType === 'device') body.deviceId = entityId
-      else if (entityType === 'case') body.caseId = entityId
-      else if (entityType === 'item') body.itemId = entityId
+      if (entityType === 'case') body.caseId = entityId
+      else if (entityType === 'item' || entityType === 'item_in_case') body.itemId = entityId
       else body.isOther = true
 
       const res = await fetch('/api/issues', {
@@ -73,7 +72,8 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
       setShowForm(false)
       setDescription('')
       setEntityId('')
-      setEntityType('device')
+      setSelectedCaseId('')
+      setEntityType('item')
       router.refresh()
     } finally {
       setSubmitting(false)
@@ -109,31 +109,68 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
         <form onSubmit={handleSubmit} className="card space-y-4">
           <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Report an Issue</h2>
           <div>
-            <label className="block text-sm font-medium mb-1">What are you reporting an issue with?</label>
+            <label className="block text-sm font-medium mb-1">Type</label>
             <select
               className="input-field"
               value={entityType}
-              onChange={e => { setEntityType(e.target.value as EntityType); setEntityId('') }}
+              onChange={e => { setEntityType(e.target.value as EntityType); setEntityId(''); setSelectedCaseId('') }}
             >
-              <option value="device">A device</option>
-              <option value="case">A case</option>
-              <option value="item">A stored item</option>
+              <option value="item">Item</option>
+              <option value="item_in_case">Item in a case</option>
+              <option value="case">Case</option>
               <option value="other">Other</option>
             </select>
           </div>
-          {entityType !== 'other' && (
+
+          {entityType === 'item' && (
             <div>
-              <label className="block text-sm font-medium mb-1">
-                {entityType === 'device' ? 'Device' : entityType === 'case' ? 'Case' : 'Item'}
-              </label>
+              <label className="block text-sm font-medium mb-1">Item</label>
               <select className="input-field" value={entityId} onChange={e => setEntityId(e.target.value)} required>
                 <option value="">Select...</option>
-                {entityOptions.map(o => (
+                {standaloneItems.map(o => (
                   <option key={o.id} value={o.id}>{o.name}</option>
                 ))}
               </select>
             </div>
           )}
+
+          {entityType === 'item_in_case' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-1">Case</label>
+                <select className="input-field" value={selectedCaseId} onChange={e => { setSelectedCaseId(e.target.value); setEntityId('') }} required>
+                  <option value="">Select case...</option>
+                  {allCases.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              {selectedCaseId && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Item</label>
+                  <select className="input-field" value={entityId} onChange={e => setEntityId(e.target.value)} required>
+                    <option value="">Select item...</option>
+                    {caseItems.map(o => (
+                      <option key={o.id} value={o.id}>{o.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </>
+          )}
+
+          {entityType === 'case' && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Case</label>
+              <select className="input-field" value={entityId} onChange={e => setEntityId(e.target.value)} required>
+                <option value="">Select...</option>
+                {allCases.map(o => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium mb-1">Description</label>
             <textarea
