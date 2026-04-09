@@ -214,7 +214,7 @@ export default function EventForm({
       const opt = allItems.find((i) => i.id === invId)
       if (!opt) return
       if (qty! > opt.quantity) {
-        setInvQtyError(`Only ${opt.quantity} available in inventory.`)
+        setInvQtyError(`Only ${opt.quantity} available.`)
         return
       }
       member = { type: 'item', id: opt.id, name: opt.name, quantity: qty! }

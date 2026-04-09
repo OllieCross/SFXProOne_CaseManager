@@ -7,7 +7,7 @@ import { logAudit } from '@/lib/audit'
 type RouteParams = { params: Promise<{ id: string; itemId: string }> }
 
 const schema = z.object({
-  targetCaseId: z.string().min(1),
+  targetCaseId: z.string().min(1).nullable(),
 })
 
 // PATCH /api/cases/[id]/items/[itemId]/move - move an item to a different case
@@ -30,9 +30,11 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  const targetCase = await prisma.case.findUnique({ where: { id: targetCaseId } })
-  if (!targetCase) {
-    return NextResponse.json({ error: 'Target case not found' }, { status: 404 })
+  if (targetCaseId !== null) {
+    const targetCase = await prisma.case.findUnique({ where: { id: targetCaseId } })
+    if (!targetCase) {
+      return NextResponse.json({ error: 'Target case not found' }, { status: 404 })
+    }
   }
 
   const updated = await prisma.item.update({
@@ -40,7 +42,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
     data: { caseId: targetCaseId },
   })
 
-  await logAudit('ITEM_MOVED', session.user.id, id, { itemName: item.name, targetCaseId })
+  await logAudit('ITEM_MOVED', session.user.id, id, { itemName: item.name, targetCaseId: targetCaseId ?? 'standalone' })
 
   return NextResponse.json(updated)
 }

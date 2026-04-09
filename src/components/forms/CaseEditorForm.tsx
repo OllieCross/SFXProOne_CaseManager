@@ -238,8 +238,8 @@ export default function CaseEditorForm({ mode, caseId, isAdmin, initialData, all
     })
   }
 
-  async function moveItemToCase(itemId: string, targetCaseId: string) {
-    if (!activeCaseId || !targetCaseId) return
+  async function moveItemToCase(itemId: string, targetCaseId: string | null) {
+    if (!activeCaseId) return
     await fetch(`/api/cases/${activeCaseId}/items/${itemId}/move`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -830,7 +830,7 @@ type SortableItemRowProps = {
   mode: 'create' | 'edit'
   allCases: { id: string; name: string }[]
   onUpdate: (index: number, field: keyof ItemRow, value: string | number) => void
-  onMoveToCase: (itemId: string, targetCaseId: string) => void
+  onMoveToCase: (itemId: string, targetCaseId: string | null) => void
   onRemove: () => void
 }
 
@@ -870,9 +870,10 @@ function SortableItemRow({ id, item, index, mode, allCases, onUpdate, onMoveToCa
           }}
         />
         <input type="text" className="input-field col-span-8" placeholder="Comment (optional)" value={item.comment} onChange={(e) => onUpdate(index, 'comment', e.target.value)} />
-        {mode === 'edit' && item.id && allCases.length > 0 && (
-          <select onChange={(e) => { if (e.target.value) onMoveToCase(item.id!, e.target.value) }} className="col-span-10 text-xs bg-surface border border-foreground/10 rounded text-muted px-1 py-1" defaultValue="" title="Move to another case">
-            <option value="">Move to another case...</option>
+        {mode === 'edit' && item.id && (
+          <select onChange={(e) => { if (e.target.value) onMoveToCase(item.id!, e.target.value === '__standalone__' ? null : e.target.value) }} className="col-span-10 text-xs bg-surface border border-foreground/10 rounded text-muted px-1 py-1" defaultValue="" title="Move item">
+            <option value="">Move to...</option>
+            <option value="__standalone__">No case (standalone)</option>
             {allCases.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         )}
