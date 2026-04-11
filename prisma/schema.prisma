@@ -373,6 +373,7 @@ model Tank {
   documents        TankDocument[]
   logbook          TankLogbookEntry[]
   eventTanks       EventTank[]
+  issueEntries     IssueEntry[]
   createdById      String?
   createdBy        User?              @relation("TankCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   updatedById      String?
@@ -491,6 +492,8 @@ model IssueEntry {
   case        Case?    @relation(fields: [caseId], references: [id], onDelete: SetNull)
   itemId      String?
   item        Item?    @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  tankId      String?
+  tank        Tank?    @relation(fields: [tankId], references: [id], onDelete: SetNull)
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())

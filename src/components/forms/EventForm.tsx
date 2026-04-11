@@ -8,8 +8,8 @@ type MemberType = 'stagehand' | 'case' | 'device' | 'item' | 'consumable' | 'tan
 
 type UserOption = { id: string; name: string; email: string }
 type CaseOption = { id: string; name: string }
-type DeviceOption = { id: string; name: string; status: string }
-type ItemOption = { id: string; name: string; quantity: number }
+type DeviceOption = { id: string; name: string; status: string; caseId: string | null }
+type ItemOption = { id: string; name: string; quantity: number; caseId: string | null }
 type ConsumableOption = { id: string; name: string; unit: string }
 type TankOption = { id: string; name: string; unit: string; chemicalCompound: string }
 type PyroOption = { id: string; name: string; category: string; brand: string | null }
@@ -127,6 +127,7 @@ export default function EventForm({
   const [invQtyRaw, setInvQtyRaw] = useState('1')
   const [invQtyError, setInvQtyError] = useState('')
   const [invSearch, setInvSearch] = useState('')
+  const [invCaseFilter, setInvCaseFilter] = useState<string>('__none__')
 
   // Group picker
   const [groupId, setGroupId] = useState('')
@@ -289,15 +290,15 @@ export default function EventForm({
     const sq = invSearch.trim().toLowerCase()
     let opts: { id: string; name: string; status?: string; unit?: string; maxQty?: number }[] = []
     if (invType === 'case') opts = allCases.filter((c) => !isMember('case', c.id))
-    else if (invType === 'device') opts = allDevices.filter((d) => !isMember('device', d.id))
-    else if (invType === 'item') opts = allItems.filter((i) => !isMember('item', i.id)).map((i) => ({ ...i, maxQty: i.quantity }))
+    else if (invType === 'device') opts = allDevices.filter((d) => !isMember('device', d.id) && (invCaseFilter === '__none__' ? d.caseId === null : d.caseId === invCaseFilter))
+    else if (invType === 'item') opts = allItems.filter((i) => !isMember('item', i.id) && (invCaseFilter === '__none__' ? i.caseId === null : i.caseId === invCaseFilter)).map((i) => ({ ...i, maxQty: i.quantity }))
     else if (invType === 'consumable') opts = allConsumables.filter((c) => !isMember('consumable', c.id))
     else if (invType === 'tank') opts = allTanks.filter((t) => !isMember('tank', t.id)).map((t) => ({ ...t, unit: `${COMPOUND_LABELS[t.chemicalCompound] ?? t.chemicalCompound} - ${t.unit}` }))
     else opts = allPyros.filter((p) => !isMember('pyro', p.id)).map((p) => ({ id: p.id, name: p.name, unit: p.category + (p.brand ? ` - ${p.brand}` : '') }))
     if (sq) opts = opts.filter((o) => o.name.toLowerCase().includes(sq))
     return opts
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invType, invSearch, members, allCases, allDevices, allItems, allConsumables, allTanks, allPyros])
+  }, [invType, invSearch, invCaseFilter, members, allCases, allDevices, allItems, allConsumables, allTanks, allPyros])
 
   const availableCrew = useMemo(
     () => allUsers.filter((u) => !isMember('stagehand', u.id)),
@@ -531,7 +532,7 @@ export default function EventForm({
               <button
                 key={t}
                 type="button"
-                onClick={() => { setInvType(t); setInvId(''); setInvSearch(''); setInvQtyRaw('1'); setInvQtyError('') }}
+                onClick={() => { setInvType(t); setInvId(''); setInvSearch(''); setInvQtyRaw('1'); setInvQtyError(''); setInvCaseFilter('__none__') }}
                 className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${invType === t ? 'border-brand text-brand' : 'border-foreground/10 text-muted hover:text-foreground'}`}
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -547,6 +548,20 @@ export default function EventForm({
             value={invSearch}
             onChange={(e) => { setInvSearch(e.target.value); setInvId('') }}
           />
+
+          {/* Case filter (device / item only) */}
+          {(invType === 'device' || invType === 'item') && (
+            <select
+              className="input-field"
+              value={invCaseFilter}
+              onChange={(e) => { setInvCaseFilter(e.target.value); setInvId('') }}
+            >
+              <option value="__none__">No case</option>
+              {allCases.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          )}
 
           {/* Picker row */}
           <div className="flex gap-2 flex-wrap">
@@ -574,7 +589,7 @@ export default function EventForm({
                 {invQtyError && <p className="text-red-400 text-xs">{invQtyError}</p>}
               </div>
             )}
-            <button type="button" onClick={addInventory} disabled={!invId} className="btn-primary text-sm shrink-0 self-start">
+            <button type="button" onClick={addInventory} disabled={!invId} className="btn-primary text-sm shrink-0 h-[42px]">
               Add
             </button>
           </div>

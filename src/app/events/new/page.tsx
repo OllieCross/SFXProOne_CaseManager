@@ -12,8 +12,8 @@ export default async function NewEventPage() {
   const [allUsers, allCases, allDevices, allItems, allConsumables, allTanks, allPyros, allGroups] = await Promise.all([
     prisma.user.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, email: true } }),
     prisma.case.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
-    prisma.device.findMany({ where: { deletedAt: null, caseId: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
-    prisma.item.findMany({ where: { caseId: null, deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
+    prisma.device.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true, caseId: true } }),
+    prisma.item.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true, caseId: true } }),
     prisma.consumable.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
     prisma.tank.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true, chemicalCompound: true } }),
     prisma.pyro.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, category: true, brand: true } }),

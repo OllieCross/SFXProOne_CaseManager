@@ -8,9 +8,10 @@ const createSchema = z.object({
   deviceId: z.string().optional().nullable(),
   caseId: z.string().optional().nullable(),
   itemId: z.string().optional().nullable(),
+  tankId: z.string().optional().nullable(),
   isOther: z.boolean().optional(),
-}).refine(d => d.isOther || d.deviceId || d.caseId || d.itemId, {
-  message: 'At least one of deviceId, caseId, or itemId must be provided, or select Other',
+}).refine(d => d.isOther || d.deviceId || d.caseId || d.itemId || d.tankId, {
+  message: 'At least one entity must be provided, or select Other',
 })
 
 export async function GET() {
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
       deviceId: parsed.data.deviceId ?? null,
       caseId: parsed.data.caseId ?? null,
       itemId: parsed.data.itemId ?? null,
+      tankId: parsed.data.tankId ?? null,
       userId: session.user.id,
     },
     include: {
@@ -65,6 +67,7 @@ export async function POST(req: Request) {
       device: { select: { id: true, name: true } },
       case: { select: { id: true, name: true } },
       item: { select: { id: true, name: true } },
+      tank: { select: { id: true, name: true } },
     },
   })
 

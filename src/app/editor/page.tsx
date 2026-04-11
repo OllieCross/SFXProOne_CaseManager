@@ -11,7 +11,7 @@ export default async function InventoryPage() {
   const [cases, devices, consumables, standaloneItems, tanks, pyros] = await Promise.all([
     prisma.case.findMany({
       where: { deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { name: 'asc' },
       include: {
         items: { select: { name: true } },
         _count: { select: { items: true, devices: true } },
@@ -19,7 +19,7 @@ export default async function InventoryPage() {
     }),
     prisma.device.findMany({
       where: { deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { name: 'asc' },
       include: {
         case: { select: { id: true, name: true } },
         _count: { select: { images: true, documents: true, logbook: true } },

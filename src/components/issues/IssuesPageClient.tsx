@@ -14,6 +14,7 @@ type ManualIssue = {
   device: { id: string; name: string } | null
   case: { id: string; name: string } | null
   item: { id: string; name: string } | null
+  tank: { id: string; name: string } | null
 }
 type EntityOption = { id: string; name: string }
 type ItemOption = { id: string; name: string; caseId: string | null }
@@ -23,11 +24,12 @@ type Props = {
   manualIssues: ManualIssue[]
   allCases: EntityOption[]
   allItems: ItemOption[]
+  allTanks: EntityOption[]
 }
 
-type EntityType = 'item' | 'item_in_case' | 'case' | 'other'
+type EntityType = 'item' | 'item_in_case' | 'case' | 'tank' | 'other'
 
-export default function IssuesPageClient({ faultyDevices, manualIssues: initialIssues, allCases, allItems }: Props) {
+export default function IssuesPageClient({ faultyDevices, manualIssues: initialIssues, allCases, allItems, allTanks }: Props) {
   const router = useRouter()
   const [issues, setIssues] = useState<ManualIssue[]>(initialIssues)
   const [showForm, setShowForm] = useState(false)
@@ -53,6 +55,7 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
       const body: Record<string, string | boolean> = { description }
       if (entityType === 'case') body.caseId = entityId
       else if (entityType === 'item' || entityType === 'item_in_case') body.itemId = entityId
+      else if (entityType === 'tank') body.tankId = entityId
       else body.isOther = true
 
       const res = await fetch('/api/issues', {
@@ -118,6 +121,7 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
               <option value="item">Item</option>
               <option value="item_in_case">Item in a case</option>
               <option value="case">Case</option>
+              <option value="tank">Tank</option>
               <option value="other">Other</option>
             </select>
           </div>
@@ -165,6 +169,18 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
               <select className="input-field" value={entityId} onChange={e => setEntityId(e.target.value)} required>
                 <option value="">Select...</option>
                 {allCases.map(o => (
+                  <option key={o.id} value={o.id}>{o.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {entityType === 'tank' && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Tank</label>
+              <select className="input-field" value={entityId} onChange={e => setEntityId(e.target.value)} required>
+                <option value="">Select...</option>
+                {allTanks.map(o => (
                   <option key={o.id} value={o.id}>{o.name}</option>
                 ))}
               </select>
@@ -235,7 +251,7 @@ export default function IssuesPageClient({ faultyDevices, manualIssues: initialI
         ) : (
           <div className="space-y-2">
             {issues.map(i => {
-              const entity = i.device ?? i.case ?? i.item
+              const entity = i.device ?? i.case ?? i.item ?? i.tank
               return (
                 <div key={i.id} className="card space-y-1">
                   <div className="flex items-start justify-between gap-3">

@@ -4,6 +4,25 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.4.1 - 2026-04-11
+
+### Added
+
+- **Event form - case filter for devices and items**: when the Device or Item tab is selected in the inventory picker, a new "No case / case" dropdown appears between the search field and the item dropdown; selecting "No case" shows only devices or items not assigned to any case, selecting a case shows only devices or items belonging to that case; defaults to "No case" on tab switch
+- **Issues - Tank type**: "Tank" option added to the issue report type dropdown; selecting it shows a tank selector; tank name is shown on the issue card in the list; requires a database migration to add `tankId` to `IssueEntry`
+
+### Fixed
+
+- **Event form - Add button height**: Add button in the inventory picker row now has a fixed height matching the adjacent dropdown, preventing it from appearing taller or shorter depending on context
+- **Inventory - cases and devices sort order**: cases and devices on the inventory page were sorted by last-updated date; now sorted alphabetically by name, consistent with all other inventory entities
+- **Issues - item type filtering**: the "Item" option in the issue report form now only lists standalone items (not assigned to any case); items inside a case are accessible via the "Item in a case" option added in v1.4.0
+
+### Changed
+
+- **Event form - device and item pool**: the device and item dropdowns in the event form now include all non-deleted devices and items regardless of case assignment; filtering is handled by the new case filter dropdown instead of being pre-filtered server-side
+
+---
+
 ## v1.4.0 - 2026-04-09
 
 ### Added
