@@ -123,6 +123,12 @@ export default function InventoryPageClient({ cases, devices, consumables, stand
         >
           Issues
         </Link>
+        <Link
+          href="/shopping"
+          className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+        >
+          Shopping
+        </Link>
         <QRGenerator />
       </div>
 

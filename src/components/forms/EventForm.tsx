@@ -526,7 +526,7 @@ export default function EventForm({
       <section className="card space-y-4">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Inventory</h2>
 
-        {/* Type tabs — scrollable segmented control */}
+        {/* Type tabs - scrollable segmented control */}
         <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1 pb-0.5">
           {(['case', 'device', 'item', 'consumable', 'tank', 'pyro'] as const).map((t) => (
             <button
@@ -544,7 +544,7 @@ export default function EventForm({
           ))}
         </div>
 
-        {/* Picker — remounts on tab change to trigger fade-in animation */}
+        {/* Picker - remounts on tab change to trigger fade-in animation */}
         <div key={invType} className="inv-picker-enter space-y-2.5">
 
           {/* Search with icon */}

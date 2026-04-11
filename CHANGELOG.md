@@ -4,6 +4,17 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.4.7 - 2026-04-11
+
+### Added
+
+- **Inventory - Shopping List page**: a new "Shopping" button sits between the Issues and QR Code buttons on the Inventory page; tapping it opens `/shopping`, which lists all items that need restocking:
+  - Consumables and pyro effects are split into two groups - critical (red `!`) and warning (yellow `!`) - showing current stock and the relevant threshold; critical items are always listed first
+  - Tanks below 50% capacity are listed with a fill bar (yellow 30-49%, red below 30%) and current vs. full capacity
+  - Each entry links directly to the item's detail or edit page
+
+---
+
 ## v1.4.6 - 2026-04-11
 
 ### Added
