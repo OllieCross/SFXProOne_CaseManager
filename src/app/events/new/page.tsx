@@ -21,8 +21,8 @@ export default async function NewEventPage() {
       orderBy: { name: 'asc' },
       include: {
         cases: { include: { case: { select: { id: true, name: true } } } },
-        devices: { include: { device: { select: { id: true, name: true, status: true } } } },
-        items: { include: { item: { select: { id: true, name: true, quantity: true } } } },
+        devices: { include: { device: { select: { id: true, name: true, status: true, caseId: true } } } },
+        items: { include: { item: { select: { id: true, name: true, quantity: true, caseId: true } } } },
         consumables: { include: { consumable: { select: { id: true, name: true, unit: true } }, } },
       },
     }),

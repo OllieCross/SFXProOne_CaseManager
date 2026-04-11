@@ -17,8 +17,8 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
       include: {
         stagehands: { include: { user: { select: { id: true, name: true, email: true } } } },
         cases: { include: { case: { select: { id: true, name: true } } } },
-        devices: { include: { device: { select: { id: true, name: true, status: true } } } },
-        items: { include: { item: { select: { id: true, name: true, quantity: true } } } },
+        devices: { include: { device: { select: { id: true, name: true, status: true, caseId: true } } } },
+        items: { include: { item: { select: { id: true, name: true, quantity: true, caseId: true } } } },
         consumables: { include: { consumable: { select: { id: true, name: true, unit: true } } } },
         tanks: { include: { tank: { select: { id: true, name: true, unit: true, chemicalCompound: true } } } },
         pyros: { include: { pyro: { select: { id: true, name: true, category: true } } } },
@@ -35,8 +35,8 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
       orderBy: { name: 'asc' },
       include: {
         cases: { include: { case: { select: { id: true, name: true } } } },
-        devices: { include: { device: { select: { id: true, name: true, status: true } } } },
-        items: { include: { item: { select: { id: true, name: true, quantity: true } } } },
+        devices: { include: { device: { select: { id: true, name: true, status: true, caseId: true } } } },
+        items: { include: { item: { select: { id: true, name: true, quantity: true, caseId: true } } } },
         consumables: { include: { consumable: { select: { id: true, name: true, unit: true } } } },
       },
     }),
