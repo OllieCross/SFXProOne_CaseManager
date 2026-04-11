@@ -9,12 +9,12 @@
 
 @keyframes eventPulse {
   0%, 100% {
-    outline: 2px solid #16a34a;
-    box-shadow: 0 0 0 2px #16a34a, 0 0 14px 3px rgba(22,163,74,0.25);
+    outline: 2px solid #1576bf;
+    box-shadow: 0 0 0 2px #1576bf, 0 0 14px 3px rgba(21,118,191,0.25);
   }
   50% {
-    outline: 2px solid rgba(22,163,74,0.4);
-    box-shadow: 0 0 0 2px rgba(22,163,74,0.4), 0 0 22px 6px rgba(22,163,74,0.5);
+    outline: 2px solid rgba(21,118,191,0.4);
+    box-shadow: 0 0 0 2px rgba(21,118,191,0.4), 0 0 22px 6px rgba(21,118,191,0.5);
   }
 }
 

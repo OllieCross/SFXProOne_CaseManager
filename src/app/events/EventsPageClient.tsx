@@ -54,11 +54,21 @@ export default function EventsPageClient({ events, userId, todayISO, tomorrowISO
   const tomorrowEnd = new Date(tomorrowISO).getTime()
   const [filter, setFilter] = useState<FilterOption>('all')
 
+  const tomorrowStart = new Date(tomorrowISO).getTime()
+
   function isHighlighted(event: EventRow) {
     const start = new Date(event.startDate).getTime()
     const isUserCrew = event.stagehands.some((s) => s.userId === userId)
     const isTodayOrTomorrow = start >= todayStart && start < tomorrowEnd
     return isUserCrew && isTodayOrTomorrow
+  }
+
+  function highlightLabel(event: EventRow): 'TODAY' | 'TOMORROW' | null {
+    const start = new Date(event.startDate).getTime()
+    if (!event.stagehands.some((s) => s.userId === userId)) return null
+    if (start >= todayStart && start < tomorrowStart) return 'TODAY'
+    if (start >= tomorrowStart && start < tomorrowEnd) return 'TOMORROW'
+    return null
   }
 
   const filtered = events.filter((e) => {
@@ -111,6 +121,7 @@ export default function EventsPageClient({ events, userId, todayISO, tomorrowISO
         </div>
       ) : sorted.map((event) => {
         const highlighted = isHighlighted(event)
+        const label = highlightLabel(event)
         return (
           <div
             key={event.id}
@@ -125,6 +136,7 @@ export default function EventsPageClient({ events, userId, todayISO, tomorrowISO
 
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
+                {label && <p className="text-xs font-semibold text-brand tracking-widest mb-0.5 text-center">{label}</p>}
                 <p className="font-medium break-words">{event.name}</p>
                 <p className="text-sm text-muted break-words">{event.venueName}{event.location ? ` - ${event.location}` : ''}</p>
               </div>
@@ -146,7 +158,7 @@ export default function EventsPageClient({ events, userId, todayISO, tomorrowISO
                 {event.stagehands.map((s) => (
                   <span
                     key={s.userId}
-                    className={`text-xs px-2 py-0.5 rounded-full ${s.userId === userId ? 'bg-green-500/20 text-green-400 font-medium' : 'bg-foreground/10 text-foreground/80'}`}
+                    className={`text-xs px-2 py-0.5 rounded-full ${s.userId === userId ? 'bg-brand/20 text-brand font-medium' : 'bg-foreground/10 text-foreground/80'}`}
                   >
                     {s.userName}
                   </span>

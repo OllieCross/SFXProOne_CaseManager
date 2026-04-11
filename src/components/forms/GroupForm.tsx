@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 type MemberType = 'case' | 'device' | 'item' | 'consumable'
 
@@ -48,6 +49,16 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [showDelete, setShowDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleDelete() {
+    if (!groupId) return
+    setDeleting(true)
+    await fetch(`/api/groups/${groupId}`, { method: 'DELETE' })
+    router.push('/groups')
+    router.refresh()
+  }
 
   // ---------- Helpers ----------
 
@@ -240,30 +251,28 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
               ))}
             </select>
 
-            <div className="flex gap-2">
-              {(addType === 'item' || addType === 'consumable') && (
-                <div className="flex flex-col gap-1">
-                  <input
-                    type="text"
-                    inputMode={addType === 'consumable' ? 'decimal' : 'numeric'}
-                    className={`input-field w-16 ${addQtyError ? 'border-red-500' : ''}`}
-                    placeholder="Qty"
-                    value={addQtyRaw}
-                    onChange={(e) => { setAddQtyRaw(e.target.value); setAddQtyError('') }}
-                  />
-                  {addQtyError && <p className="text-red-400 text-xs">{addQtyError}</p>}
-                </div>
-              )}
+            {(addType === 'item' || addType === 'consumable') && (
+              <div className="flex flex-col gap-1">
+                <input
+                  type="text"
+                  inputMode={addType === 'consumable' ? 'decimal' : 'numeric'}
+                  className={`input-field ${addQtyError ? 'border-red-500' : ''}`}
+                  placeholder="Qty"
+                  value={addQtyRaw}
+                  onChange={(e) => { setAddQtyRaw(e.target.value); setAddQtyError('') }}
+                />
+                {addQtyError && <p className="text-red-400 text-xs">{addQtyError}</p>}
+              </div>
+            )}
 
-              <button
-                type="button"
-                onClick={addMember}
-                disabled={!addId}
-                className="btn-primary text-sm shrink-0 h-[42px]"
-              >
-                Add
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={addMember}
+              disabled={!addId}
+              className="btn-primary text-sm w-full h-[42px]"
+            >
+              Add
+            </button>
           </div>
         </div>
       </section>
@@ -315,12 +324,31 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
 
       {error && <p className="text-red-400 text-sm">{error}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
         <button type="submit" disabled={saving} className="btn-primary">
           {saving ? 'Saving...' : mode === 'create' ? 'Create Group' : 'Save Changes'}
         </button>
         <button type="button" onClick={() => router.back()} className="btn-ghost">Cancel</button>
+        {mode === 'edit' && (
+          <button
+            type="button"
+            onClick={() => setShowDelete(true)}
+            className="ml-auto bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+          >
+            Delete Group
+          </button>
+        )}
       </div>
+
+      {showDelete && (
+        <ConfirmModal
+          title="Delete group"
+          message={`Are you sure you want to delete "${initialData?.name}"? This cannot be undone.`}
+          onConfirm={handleDelete}
+          onCancel={() => setShowDelete(false)}
+          loading={deleting}
+        />
+      )}
     </form>
   )
 }

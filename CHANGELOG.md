@@ -4,6 +4,27 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.4.4 - 2026-04-11
+
+### Added
+
+- **Group edit - delete button**: edit group page now has a "Delete Group" button pushed to the right, matching the case and event editor layout; tapping it opens a confirmation modal before deleting
+- **Groups page - card navigation**: group cards are now fully tappable and link directly to the edit page (editors only); the separate "Edit" button is removed and replaced with a ">" chevron, consistent with the inventory page style
+
+### Fixed
+
+- **Group form - add members input widths**: dropdown, quantity input, and Add button in the Add Members section are now all full width and stacked, so they match each other exactly
+- **Groups page - title/button spacing**: added a guaranteed gap between the "Groups" heading and the "+ Group" button so they no longer crowd each other when the page is narrow or group names are short
+- **Groups page - new group button**: "+ New Group" button renamed to "+ Group" for brevity
+
+### Changed
+
+- **Events - highlight colour**: the pulsing border and glow on highlighted event cards changed from green to the app's brand blue, matching the button colour used throughout the app
+- **Events - crew pill colour**: the crew pill for the currently logged-in user on a highlighted event card changed from green to brand blue; other crew members' pills are unchanged
+- **Events - TODAY / TOMORROW label**: highlighted event cards now show a small, centered, blue "TODAY" or "TOMORROW" label in uppercase above the event title to make it immediately clear why the card is highlighted
+
+---
+
 ## v1.4.3 - 2026-04-11
 
 ### Added

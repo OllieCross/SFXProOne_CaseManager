@@ -21,10 +21,10 @@ export default async function GroupsPage() {
     <>
       <Header />
       <main className="max-w-3xl mx-auto px-4 py-6 space-y-6 pb-16">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Groups</h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-xl font-bold min-w-0">Groups</h1>
           {canEdit && (
-            <Link href="/groups/new" className="btn-primary text-sm">+ New Group</Link>
+            <Link href="/groups/new" className="btn-primary text-sm shrink-0">+ Group</Link>
           )}
         </div>
 
@@ -33,7 +33,7 @@ export default async function GroupsPage() {
             <p className="text-muted text-sm font-medium">No groups yet.</p>
             <p className="text-muted text-xs max-w-xs">Groups let you bundle cases, devices, and consumables into reusable templates for events.</p>
             {canEdit && (
-              <Link href="/groups/new" className="btn-primary text-sm mt-2">+ New Group</Link>
+              <Link href="/groups/new" className="btn-primary text-sm mt-2">+ Group</Link>
             )}
           </div>
         ) : (
@@ -44,20 +44,17 @@ export default async function GroupsPage() {
                 g._count.devices > 0 && `${g._count.devices} device${g._count.devices !== 1 ? 's' : ''}`,
                 g._count.items > 0 && `${g._count.items} item${g._count.items !== 1 ? 's' : ''}`,
               ].filter(Boolean)
+              const CardEl = canEdit ? Link : 'div'
               return (
-                <div key={g.id} className="card flex items-center justify-between gap-4">
+                <CardEl key={g.id} href={canEdit ? `/groups/${g.id}/edit` : undefined} className={`card flex items-center justify-between gap-4 ${canEdit ? 'hover:bg-foreground/5 transition-colors' : ''}`}>
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{g.name}</p>
                     <p className="text-muted text-xs mt-0.5">
                       {parts.length > 0 ? parts.join(' · ') : 'Empty'}
                     </p>
                   </div>
-                  {canEdit && (
-                    <Link href={`/groups/${g.id}/edit`} className="btn-primary text-xs py-1.5 px-3 shrink-0">
-                      Edit
-                    </Link>
-                  )}
-                </div>
+                  {canEdit && <span className="text-muted text-xl shrink-0">&rsaquo;</span>}
+                </CardEl>
               )
             })}
           </div>
