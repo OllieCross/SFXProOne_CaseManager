@@ -44,9 +44,8 @@ export default async function GroupsPage() {
                 g._count.devices > 0 && `${g._count.devices} device${g._count.devices !== 1 ? 's' : ''}`,
                 g._count.items > 0 && `${g._count.items} item${g._count.items !== 1 ? 's' : ''}`,
               ].filter(Boolean)
-              const CardEl = canEdit ? Link : 'div'
-              return (
-                <CardEl key={g.id} href={canEdit ? `/groups/${g.id}/edit` : undefined} className={`card flex items-center justify-between gap-4 ${canEdit ? 'hover:bg-foreground/5 transition-colors' : ''}`}>
+              const inner = (
+                <>
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{g.name}</p>
                     <p className="text-muted text-xs mt-0.5">
@@ -54,7 +53,16 @@ export default async function GroupsPage() {
                     </p>
                   </div>
                   {canEdit && <span className="text-muted text-xl shrink-0">&rsaquo;</span>}
-                </CardEl>
+                </>
+              )
+              return canEdit ? (
+                <Link key={g.id} href={`/groups/${g.id}/edit`} className="card flex items-center justify-between gap-4 hover:bg-foreground/5 transition-colors">
+                  {inner}
+                </Link>
+              ) : (
+                <div key={g.id} className="card flex items-center justify-between gap-4">
+                  {inner}
+                </div>
               )
             })}
           </div>
