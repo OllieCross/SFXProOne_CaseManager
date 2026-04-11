@@ -8,7 +8,7 @@ const schema = z.object({
   action: z.enum(['add', 'remove']),
   type: z.enum(['case', 'device', 'item', 'consumable']),
   memberId: z.string().min(1),
-  quantityNeeded: z.number().min(0).optional(), // only for consumables
+  quantityNeeded: z.number().min(0).optional(), // for consumables and items
 })
 
 type Params = { params: Promise<{ id: string }> }
@@ -48,8 +48,8 @@ export async function PATCH(req: Request, { params }: Params) {
       case 'item':
         await prisma.groupItem.upsert({
           where: { groupId_itemId: { groupId, itemId: memberId } },
-          create: { groupId, itemId: memberId },
-          update: {},
+          create: { groupId, itemId: memberId, quantityNeeded: Math.max(1, Math.round(quantityNeeded ?? 1)) },
+          update: { quantityNeeded: Math.max(1, Math.round(quantityNeeded ?? 1)) },
         })
         break
       case 'consumable':

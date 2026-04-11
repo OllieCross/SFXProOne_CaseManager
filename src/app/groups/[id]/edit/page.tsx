@@ -22,8 +22,8 @@ export default async function EditGroupPage({ params }: { params: Promise<{ id: 
       },
     }),
     prisma.case.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
-    prisma.device.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
-    prisma.item.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
+    prisma.device.findMany({ where: { deletedAt: null, caseId: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
+    prisma.item.findMany({ where: { deletedAt: null, caseId: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
     prisma.consumable.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
   ])
 
@@ -32,7 +32,7 @@ export default async function EditGroupPage({ params }: { params: Promise<{ id: 
   const members = [
     ...group.cases.map((gc) => ({ type: 'case' as const, id: gc.case.id, name: gc.case.name })),
     ...group.devices.map((gd) => ({ type: 'device' as const, id: gd.device.id, name: gd.device.name, status: gd.device.status })),
-    ...group.items.map((gi) => ({ type: 'item' as const, id: gi.item.id, name: gi.item.name, quantity: gi.item.quantity })),
+    ...group.items.map((gi) => ({ type: 'item' as const, id: gi.item.id, name: gi.item.name, quantity: gi.quantityNeeded })),
     ...group.consumables.map((gc) => ({ type: 'consumable' as const, id: gc.consumable.id, name: gc.consumable.name, unit: gc.consumable.unit, quantityNeeded: gc.quantityNeeded })),
   ]
 

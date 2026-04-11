@@ -43,7 +43,8 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
   // Add-member panel state
   const [addType, setAddType] = useState<MemberType>('case')
   const [addId, setAddId] = useState('')
-  const [addQty, setAddQty] = useState(1)
+  const [addQtyRaw, setAddQtyRaw] = useState('1')
+  const [addQtyError, setAddQtyError] = useState('')
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -80,17 +81,34 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
     } else if (addType === 'item') {
       const opt = allItems.find((i) => i.id === addId)
       if (!opt) return
-      member = { type: 'item', id: opt.id, name: opt.name, quantity: opt.quantity }
+      const qty = parseInt(addQtyRaw)
+      if (!Number.isInteger(qty) || qty < 1) {
+        setAddQtyError('Enter a valid whole number.')
+        return
+      }
+      if (qty > opt.quantity) {
+        setAddQtyError(`Only ${opt.quantity} available.`)
+        return
+      }
+      member = { type: 'item', id: opt.id, name: opt.name, quantity: qty }
     } else {
       const opt = allConsumables.find((c) => c.id === addId)
       if (!opt) return
-      member = { type: 'consumable', id: opt.id, name: opt.name, unit: opt.unit, quantityNeeded: addQty }
+      const normalized = addQtyRaw.replace(',', '.')
+      const qty = Number(normalized)
+      if (!Number.isFinite(qty) || qty <= 0 || !/^\d+([.,]\d{1,2})?$/.test(addQtyRaw.trim())) {
+        setAddQtyError('Enter a valid number (e.g. 1, 1.5, 0.25).')
+        return
+      }
+      member = { type: 'consumable', id: opt.id, name: opt.name, unit: opt.unit, quantityNeeded: qty }
     }
 
+    const parsedQty = addType === 'item' ? parseInt(addQtyRaw) : addType === 'consumable' ? Number(addQtyRaw.replace(',', '.')) : undefined
     setMembers((prev) => [...prev, member])
-    if (mode === 'edit') patchMember('add', addType, addId, addType === 'consumable' ? addQty : undefined)
+    if (mode === 'edit') patchMember('add', addType, addId, parsedQty)
     setAddId('')
-    setAddQty(1)
+    setAddQtyRaw('1')
+    setAddQtyError('')
   }
 
   function removeMember(type: MemberType, id: string) {
@@ -131,7 +149,7 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
                 action: 'add',
                 type: m.type,
                 memberId: m.id,
-                quantityNeeded: m.type === 'consumable' ? m.quantityNeeded : undefined,
+                quantityNeeded: m.type === 'consumable' ? m.quantityNeeded : m.type === 'item' ? m.quantity : undefined,
               }),
             })
           )
@@ -198,7 +216,7 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
               <button
                 key={t}
                 type="button"
-                onClick={() => { setAddType(t); setAddId('') }}
+                onClick={() => { setAddType(t); setAddId(''); setAddQtyRaw('1'); setAddQtyError('') }}
                 className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${addType === t ? 'border-brand text-brand' : 'border-foreground/10 text-muted hover:text-foreground'}`}
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -206,9 +224,9 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
             ))}
           </div>
 
-          <div className="flex gap-2">
+          <div className="space-y-2">
             <select
-              className="input-field flex-1"
+              className="input-field"
               value={addId}
               onChange={(e) => setAddId(e.target.value)}
             >
@@ -217,31 +235,35 @@ export default function GroupForm({ mode, groupId, initialData, allCases, allDev
                 <option key={opt.id} value={opt.id}>
                   {opt.name}
                   {'status' in opt ? ` (${STATUS_LABELS[opt.status as string] ?? String(opt.status)})` : ''}
-                  {'unit' in opt && 'stockQuantity' in opt === false ? '' : ''}
+                  {'quantity' in opt ? ` (${(opt as ItemOption).quantity}pcs)` : ''}
                 </option>
               ))}
             </select>
 
-            {addType === 'consumable' && (
-              <input
-                type="number"
-                min={0.01}
-                step="0.01"
-                className="input-field w-24"
-                placeholder="Qty"
-                value={addQty}
-                onChange={(e) => setAddQty(parseFloat(e.target.value) || 1)}
-              />
-            )}
+            <div className="flex gap-2">
+              {(addType === 'item' || addType === 'consumable') && (
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="text"
+                    inputMode={addType === 'consumable' ? 'decimal' : 'numeric'}
+                    className={`input-field w-16 ${addQtyError ? 'border-red-500' : ''}`}
+                    placeholder="Qty"
+                    value={addQtyRaw}
+                    onChange={(e) => { setAddQtyRaw(e.target.value); setAddQtyError('') }}
+                  />
+                  {addQtyError && <p className="text-red-400 text-xs">{addQtyError}</p>}
+                </div>
+              )}
 
-            <button
-              type="button"
-              onClick={addMember}
-              disabled={!addId}
-              className="btn-primary text-sm shrink-0"
-            >
-              Add
-            </button>
+              <button
+                type="button"
+                onClick={addMember}
+                disabled={!addId}
+                className="btn-primary text-sm shrink-0 h-[42px]"
+              >
+                Add
+              </button>
+            </div>
           </div>
         </div>
       </section>

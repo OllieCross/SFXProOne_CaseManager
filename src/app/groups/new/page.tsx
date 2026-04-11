@@ -11,8 +11,8 @@ export default async function NewGroupPage() {
 
   const [allCases, allDevices, allItems, allConsumables] = await Promise.all([
     prisma.case.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true } }),
-    prisma.device.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
-    prisma.item.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
+    prisma.device.findMany({ where: { deletedAt: null, caseId: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, status: true } }),
+    prisma.item.findMany({ where: { deletedAt: null, caseId: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, quantity: true } }),
     prisma.consumable.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' }, select: { id: true, name: true, unit: true } }),
   ])
 

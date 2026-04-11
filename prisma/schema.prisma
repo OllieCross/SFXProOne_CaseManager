@@ -271,10 +271,11 @@ model GroupDevice {
 }
 
 model GroupItem {
-  groupId String
-  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  itemId  String
-  item    Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  groupId        String
+  group          Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  itemId         String
+  item           Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  quantityNeeded Int    @default(1)
 
   @@id([groupId, itemId])
 }

@@ -4,6 +4,21 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.4.3 - 2026-04-11
+
+### Added
+
+- **Group form - item quantity**: adding an item to a group now prompts for a quantity; the item dropdown shows available stock in parentheses (e.g. "Hammer (4pcs)"); quantity is validated as a whole number and capped at available inventory; the requested quantity is stored on the group and displayed in the members list
+- **Group form - consumable quantity validation**: consumable quantity input now validates as a whole number or a decimal with up to two decimal places; both dot and comma are accepted as the decimal separator; invalid input shows an inline error instead of silently falling back to 1
+
+### Fixed
+
+- **Group form - standalone filter**: device and item pickers in the group create/edit form now only list devices and items not assigned to any case
+- **Group form - qty input width**: quantity input field for both items and consumables is now narrower (fits 1-2 digits), matching the visual weight of the field's purpose
+- **Group form - qty input clearable**: quantity input changed from a number spinner to a plain text input, allowing the field to be fully cleared before typing a new value
+
+---
+
 ## v1.4.2 - 2026-04-11
 
 ### Added
