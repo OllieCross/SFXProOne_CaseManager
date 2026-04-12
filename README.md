@@ -25,13 +25,23 @@ The app supports QR code scanning (including legacy Google Keep QR codes), direc
 - **Consumables Stock:** Track quantities of expendable materials (confetti, pyro cartridges, CO2). Stock is decremented automatically when an event completes.
 - **Reusable Groups (Templates):** Bundle cases, devices, items, and consumables into named group templates (e.g. "Small Lights Package") to speed up event creation.
 - **Event Management:** Create and manage real-world jobs/shows with full inventory assignment, stagehand crew lists, client contact info, and invoice status tracking.
-- **QR Code Scanning:** Camera-based scanner with manual fallback. Handles both raw string QR codes (new stickers) and legacy Google Keep URLs stored on existing cases.
+- **Tanks:** Track SFX gas tanks (CO2, O2, N2, LN2, H2, butane/propane, water) with chemical compound, full/current capacity, fill bar (green >=60%, yellow >=30%, red <30%), notes, photos, documents, and a maintenance logbook.
+- **Pyro Effects:** Track pyrotechnic effects with brand, category (T1/T2/F1/F2/F3/F4/P1/P2/Other), stock quantity, warning/critical thresholds, notes, photos, and documents; stock decremented automatically when an event completes.
+- **Shopping List (`/shopping`):** Lists all items needing restocking - consumables and pyro split into critical (red) and warning (yellow) groups; tanks shown with a fill bar; links directly to each item's detail/edit page.
+- **Issues page (`/issues`):** Lists all devices with Faulty or In Repair status (with their last 3 logbook entries); editors can submit manual issue reports linked to a device, case, stored item, item in a case, tank, or free-text "Other" description; individual issues are deletable with a confirmation modal.
+- **Recycle Bin:** Deleting a Case, Device, Item, Consumable, Photo, or Document soft-deletes the record; items are permanently purged after 30 days. Admins can browse, restore, or immediately empty the bin from `/admin/recycle-bin`.
+- **Light / Dark Theme:** Follows OS `prefers-color-scheme` automatically; a sun/moon toggle in the header overrides and persists the preference to `localStorage`.
+- **User Profile (`/profile`):** Any logged-in user can update their display name and change their password via two independent form sections.
+- **Admin - User Management:** Admins can create new user accounts (name, email, role, password) and delete existing accounts (except their own) directly from the Admin Panel.
+- **QR Code Scanning:** Camera-based scanner with manual fallback. Handles both raw string QR codes (new stickers) and legacy Google Keep URLs stored on existing cases. Camera view shows four corner-bracket crosshair overlay to help frame the code.
 - **Media Handling:** Upload photos (JPEG, PNG, WebP, HEIC) and PDFs directly to MinIO via presigned URLs. HEIC images are converted to JPEG client-side before upload. Images are resized and compressed (max 1920 px, quality 0.8) in-browser.
 - **PDF Viewer:** In-browser PDF rendering via a self-hosted PDF.js worker.
 - **Access Control:** Three roles - VIEWER, EDITOR, ADMIN - enforced on every page and API route. SSO via Authentik OIDC or credentials login.
-- **Rate Limiting:** Redis sliding-window rate limiter on login attempts and file upload endpoints per user.
-- **Audit Logging:** Admin panel shows the last 100 audit log entries covering all entity changes (cases, devices, consumables, groups, events).
-- **Changelog:** Release notes rendered from `CHANGELOG.md` at `/changelog`.
+- **Rate Limiting:** Redis sliding-window rate limiter on login attempts and file upload/write endpoints per user.
+- **Audit Logging:** Admin panel shows the last 100 audit log entries (grouped by date) covering all entity changes (cases, devices, consumables, groups, events, items, tanks, pyro).
+- **Backup System:** Three dedicated Docker containers run nightly at 02:00 - `postgres-backup` (pg_dump - gzip, 7-day retention), `redis-backup`, and `minio-backup` (volume archives via offen/docker-volume-backup, 7-day retention).
+- **Update Snackbar:** After a version bump a blue snackbar appears on first visit showing the new version; auto-dismisses after 6 seconds; tracked per-browser in `localStorage`.
+- **Changelog:** Release notes rendered from `CHANGELOG.md` at `/changelog`. The most recent version header displays a "Latest" badge.
 - **PWA-ready:** `manifest.json` and Apple touch icons for iOS/Android home screen shortcuts.
 
 ---
@@ -122,6 +132,46 @@ The app supports QR code scanning (including legacy Google Keep QR codes), direc
 | `/items/new` | Editor+ | Create standalone item |
 | `/items/[id]/edit` | Editor+ | Edit standalone item |
 
+### Tanks
+
+| Route | Access | Description |
+|---|---|---|
+| `/tanks/new` | Editor+ | Create tank (compound, unit, full/current capacity, notes) |
+| `/tanks/[id]` | Viewer+ | Tank detail: capacity bar, info, photos, documents, logbook |
+| `/tanks/[id]/edit` | Editor+ | Edit tank fields, media, and logbook entries |
+
+### Pyro Effects
+
+| Route | Access | Description |
+|---|---|---|
+| `/pyro/new` | Editor+ | Create pyro effect (name, brand, category, stock, thresholds) |
+| `/pyro/[id]` | Viewer+ | Pyro detail: stock bar, info, photos, documents |
+| `/pyro/[id]/edit` | Editor+ | Edit pyro fields and media |
+
+### Issues
+
+| Route | Access | Description |
+|---|---|---|
+| `/issues` | Viewer+ | Faulty/In Repair devices with logbook; manual issue report form |
+
+### Shopping List
+
+| Route | Access | Description |
+|---|---|---|
+| `/shopping` | Viewer+ | Low-stock consumables, pyro, and tanks needing restocking |
+
+### Profile
+
+| Route | Access | Description |
+|---|---|---|
+| `/profile` | Viewer+ | Update display name and change password |
+
+### Admin (extended)
+
+| Route | Access | Description |
+|---|---|---|
+| `/admin/recycle-bin` | Admin | Browse, restore, or empty soft-deleted items |
+
 > **Viewer+** = VIEWER, EDITOR, ADMIN &nbsp;|&nbsp; **Editor+** = EDITOR, ADMIN &nbsp;|&nbsp; **Admin** = ADMIN only
 
 ---
@@ -134,10 +184,13 @@ The app supports QR code scanning (including legacy Google Keep QR codes), direc
 | `Case` | Physical flight case with QR code, warehouse location, items, devices, photos, and PDFs |
 | `Device` | Single identifiable piece of equipment with status, serial number, logbook, photos, and PDFs |
 | `Item` | Generic reusable accessory (cables, clamps, adapters); can be inside a case or standalone |
-| `Consumable` | Expendable stock item (confetti, pyro, CO2); stock decremented after events |
-| `Group` | Reusable template bundling cases, devices, items, and consumables |
+| `Consumable` | Expendable stock item (confetti, pyro cartridges, CO2); stock decremented after events; warning/critical thresholds |
+| `Tank` | SFX gas tank (CO2, O2, N2, LN2, H2, butane/propane, water); tracks full/current capacity, notes, photos, documents, and a maintenance logbook |
+| `Pyro` | Pyrotechnic effect with brand, category, stock quantity, warning/critical thresholds, notes, photos, and documents |
+| `Group` | Reusable template bundling cases, devices, items, consumables, tanks, and pyro |
 | `Event` | Real-world job/show with inventory assignment, stagehand crew, client info, and invoice status |
-| `LogbookEntry` | Per-device maintenance entry (date, comment, user) |
+| `LogbookEntry` | Per-device or per-tank maintenance entry (date, comment, user) |
+| `IssueEntry` | Manual issue report linked to a device, case, item, item-in-case, tank, or free-text description |
 | `AuditLog` | Append-only log of all entity changes |
 
 **Enums:**
@@ -147,6 +200,7 @@ The app supports QR code scanning (including legacy Google Keep QR codes), direc
 - `DeviceStatus`: `Working` / `Faulty` / `InRepair` / `Retired` / `Lost` / `RentedToFriend`
 - `EventStatus`: `Planned` / `Confirmed` / `Completed` / `Cancelled` / `NeedsDetails`
 - `InvoiceStatus`: `Paid` / `NotPaid` / `DepositPaid` / `DepositNotYetPaid` / `NotPaidInFull`
+- `PyroCategory`: `T1` / `T2` / `F1` / `F2` / `F3` / `F4` / `P1` / `P2` / `Other`
 
 ---
 
@@ -154,54 +208,59 @@ The app supports QR code scanning (including legacy Google Keep QR codes), direc
 
 ```text
 Inventory_Manager/
-├── prisma/
-│   ├── schema.prisma        # Full data model (User, Case, Device, Item, Consumable, Group, Event, ...)
-│   ├── seed.ts              # Seeds admin user + sample cases
-│   └── migrations/          # Prisma auto-generated SQL migrations
-├── public/
-│   ├── manifest.json        # PWA manifest
-│   ├── pdf.worker.min.mjs   # Self-hosted PDF.js worker
-│   └── icons/               # iOS/Android home screen icons
-├── src/
-│   ├── app/
-│   │   ├── api/             # All API routes (cases, devices, consumables, groups, events, minio, admin, auth)
-│   │   ├── login/           # Credentials login page
-│   │   ├── scan/            # QR scanner page
-│   │   ├── case/[id]/       # Case detail view
-│   │   ├── editor/          # Case inventory (list, new, edit)
-│   │   ├── devices/         # Device pages (new, detail, edit)
-│   │   ├── consumables/     # Consumable pages (new, edit)
-│   │   ├── groups/          # Group template pages (list, new, edit)
-│   │   ├── events/          # Event pages (list, new, detail, edit)
-│   │   ├── items/           # Standalone item pages (new, edit)
-│   │   ├── admin/           # Admin dashboard (users + audit log)
-│   │   └── changelog/       # Release notes page
-│   ├── components/
-│   │   ├── scanner/         # QRScanner (html5-qrcode wrapper)
-│   │   ├── media/           # PDFViewer, CaseGallery (lightbox)
-│   │   ├── editor/          # DeleteCaseButton, QRGenerator
-│   │   ├── forms/           # CaseEditorForm and other entity forms
-│   │   ├── admin/           # RoleSelector
-│   │   └── layout/          # Header, Footer, AuthGuard
-│   ├── lib/
-│   │   ├── prisma.ts        # Singleton PrismaClient
-│   │   ├── auth.ts          # NextAuth v5 config (credentials + Authentik OIDC, rate-limit on login)
-│   │   ├── minio.ts         # S3Client helpers (ensureBucket, presigned PUT/GET, deleteFile)
-│   │   ├── redis.ts         # ioredis singleton
-│   │   ├── rateLimit.ts     # Sliding-window rate limiter backed by Redis
-│   │   └── utils.ts         # cn(), formatBytes(), formatDate()
-│   ├── hooks/
-│   │   ├── usePermissions.ts # isViewer / isEditor / isAdmin from session role
-│   │   └── useUpload.ts      # XHR upload with progress via presigned URL
-│   └── types/
-│       ├── next-auth.d.ts   # Session extended with user.id and user.role
-│       └── case.d.ts        # Domain types (CaseWithRelations, ItemInput, CaseFormData)
-├── infrastructure/
-│   ├── traefik/             # Traefik static config, dynamic config (TLS, headers), docker-compose
-│   └── authentik/           # Authentik docker-compose and .env.example
-├── docker-compose.yml       # App stack: nextjs-app, postgres, redis, minio
-├── Dockerfile               # Multi-stage build: deps → builder → runner (non-root, standalone)
-└── entrypoint.sh            # Runs `prisma migrate deploy` then starts the server
++-- prisma/
+|   +-- schema.prisma        # Full data model (User, Case, Device, Item, Consumable, Group, Event, Tank, Pyro, ...)
+|   +-- seed.ts              # Seeds admin user + sample cases
+|   +-- migrations/          # Prisma auto-generated SQL migrations
++-- public/
+|   +-- manifest.json        # PWA manifest
+|   +-- pdf.worker.min.mjs   # Self-hosted PDF.js worker
+|   +-- icons/               # iOS/Android home screen icons
++-- src/
+|   +-- app/
+|   |   +-- api/             # All API routes (cases, devices, consumables, groups, events, tanks, pyro, minio, admin, auth)
+|   |   +-- login/           # Credentials login page
+|   |   +-- scan/            # QR scanner page
+|   |   +-- case/[id]/       # Case detail view
+|   |   +-- editor/          # Case inventory (list, new, edit)
+|   |   +-- devices/         # Device pages (new, detail, edit)
+|   |   +-- consumables/     # Consumable pages (new, edit)
+|   |   +-- groups/          # Group template pages (list, new, edit)
+|   |   +-- events/          # Event pages (list, new, detail, edit)
+|   |   +-- items/           # Standalone item pages (new, edit)
+|   |   +-- tanks/           # Tank pages (list, detail, new, edit)
+|   |   +-- pyro/            # Pyro pages (list, detail, new, edit)
+|   |   +-- shopping/        # Shopping list page
+|   |   +-- issues/          # Issues page (faulty devices + manual reports)
+|   |   +-- profile/         # User profile (display name + password)
+|   |   +-- admin/           # Admin dashboard (users, audit log, recycle bin)
+|   |   +-- changelog/       # Release notes page
+|   +-- components/
+|   |   +-- scanner/         # QRScanner (html5-qrcode wrapper)
+|   |   +-- media/           # PDFViewer, CaseGallery (lightbox)
+|   |   +-- editor/          # DeleteCaseButton, QRGenerator
+|   |   +-- forms/           # CaseEditorForm and other entity forms
+|   |   +-- admin/           # RoleSelector
+|   |   +-- layout/          # Header, Footer, AuthGuard
+|   +-- lib/
+|   |   +-- prisma.ts        # Singleton PrismaClient
+|   |   +-- auth.ts          # NextAuth v5 config (credentials + Authentik OIDC, rate-limit on login)
+|   |   +-- minio.ts         # S3Client helpers (ensureBucket, presigned PUT/GET, deleteFile)
+|   |   +-- redis.ts         # ioredis singleton
+|   |   +-- rateLimit.ts     # Sliding-window rate limiter backed by Redis
+|   |   +-- utils.ts         # cn(), formatBytes(), formatDate()
+|   +-- hooks/
+|   |   +-- usePermissions.ts # isViewer / isEditor / isAdmin from session role
+|   |   +-- useUpload.ts      # XHR upload with progress via presigned URL
+|   +-- types/
+|       +-- next-auth.d.ts   # Session extended with user.id and user.role
+|       +-- case.d.ts        # Domain types (CaseWithRelations, ItemInput, CaseFormData)
++-- infrastructure/
+|   +-- traefik/             # Traefik static config, dynamic config (TLS, headers), docker-compose
+|   +-- authentik/           # Authentik docker-compose and .env.example
++-- docker-compose.yml       # App stack: nextjs-app, postgres, redis, minio, backup containers
++-- Dockerfile               # Multi-stage build: deps -> builder -> runner (non-root, standalone)
++-- entrypoint.sh            # Runs `prisma migrate deploy` then starts the server
 ```
 
 ---
@@ -231,7 +290,7 @@ Inventory_Manager/
 3. **Configure environment variables:**
 
    Copy `.env.example` to `.env` and fill in:
-   - `DATABASE_URL` — PostgreSQL connection string
+   - `DATABASE_URL` - PostgreSQL connection string
    - `NEXTAUTH_SECRET` and `AUTH_URL`
    - `AUTH_TRUST_HOST=true` (required when behind any reverse proxy)
    - MinIO credentials and bucket name
@@ -272,15 +331,15 @@ git pull
 docker compose build
 docker compose up -d
 
-# First deploy only — seed the database:
+# First deploy only - seed the database:
 docker compose exec nextjs-app node node_modules/ts-node/dist/bin.js \
   --compiler-options '{"module":"CommonJS"}' prisma/seed.ts
 ```
 
 ### Infrastructure (separate stacks)
 
-- **Traefik** (`srv/traefik/`) — edge router, TLS termination via Let's Encrypt ACME, security headers middleware.
-- **Authentik** (`srv/authentik/`) — OIDC/OAuth2 SSO provider. Groups `editors` and `admins` control role claims returned to NextAuth.
+- **Traefik** (`srv/traefik/`) - edge router, TLS termination via Let's Encrypt ACME, security headers middleware.
+- **Authentik** (`srv/authentik/`) - OIDC/OAuth2 SSO provider. Groups `editors` and `admins` control role claims returned to NextAuth.
 
 Both run on a shared `proxy` Docker network so Traefik can route to them.
 
@@ -303,7 +362,7 @@ Both run on a shared `proxy` Docker network so Traefik can route to them.
 
 Login supports two modes:
 
-1. **Credentials** — email + password stored in the database (bcrypt hashed).
-2. **Authentik OIDC** — SSO via external Authentik instance. Role claim (`VIEWER`/`EDITOR`/`ADMIN`) is injected via a custom scope mapping using `ak_is_group_member()` expressions.
+1. **Credentials** - email + password stored in the database (bcrypt hashed).
+2. **Authentik OIDC** - SSO via external Authentik instance. Role claim (`VIEWER`/`EDITOR`/`ADMIN`) is injected via a custom scope mapping using `ak_is_group_member()` expressions.
 
 Sessions use JWT strategy. Session lifetime is configured to keep stagehands logged in for at least 30 minutes of inactivity.
