@@ -29,6 +29,14 @@
 /* ----------------------------------------------------------------
    Color tokens - dark mode default
    ---------------------------------------------------------------- */
+/* Fallback (dark) - covers the brief window before the theme script runs */
+:root {
+  --color-background: 10 10 10;
+  --color-surface: 20 20 20;
+  --color-foreground: 252 252 252;
+  --color-muted: 107 114 128;
+}
+
 /* Dark mode (default) */
 html.dark {
   --color-background: 10 10 10;

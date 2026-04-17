@@ -4,6 +4,14 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.4.8 - 2026-04-17
+
+### Fixed
+
+- **CSS flash on page refresh**: styles and tab backgrounds no longer flash unstyled on hard reload; fixed by adding `suppressHydrationWarning` to the root `<html>` element (preventing React 19 from resetting the theme class set by the inline script) and adding `:root` fallback CSS variable values so colours are always defined even before the theme class is applied
+
+---
+
 ## v1.4.7 - 2026-04-11
 
 ### Added
