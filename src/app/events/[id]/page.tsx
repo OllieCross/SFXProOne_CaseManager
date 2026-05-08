@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import Header from '@/components/layout/Header'
+import EventDateTime from './EventDateTime'
 
 const EVENT_STATUS_LABELS: Record<string, string> = {
   Planned: 'Planned', Confirmed: 'Confirmed', Completed: 'Completed',
@@ -29,14 +30,11 @@ const DEVICE_STATUS_LABELS: Record<string, string> = {
   Working: 'Working', Faulty: 'Faulty', InRepair: 'In Repair',
   Retired: 'Retired', Lost: 'Lost', RentedToFriend: 'Rented',
 }
-
-function formatDateTime(d: Date) {
-  const day = d.getDate().toString().padStart(2, '0')
-  const month = (d.getMonth() + 1).toString().padStart(2, '0')
-  const year = d.getFullYear()
-  const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
-  return `${day}/${month}/${year} at ${time}`
+const DEVICE_STATUS_COLORS: Record<string, string> = {
+  Working: 'text-green-400', Faulty: 'text-red-400', InRepair: 'text-yellow-400',
+  Retired: 'text-muted', Lost: 'text-foreground', RentedToFriend: 'text-blue-400',
 }
+
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (!value) return null
@@ -91,7 +89,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
         {/* Info card */}
         <div className="card space-y-2">
-          <InfoRow label="Start" value={formatDateTime(event.startDate)} />
+          <InfoRow label="Start" value={<EventDateTime iso={event.startDate.toISOString()} />} />
           <InfoRow label="Status" value={
             <span className={STATUS_COLORS[event.status] ?? ''}>{EVENT_STATUS_LABELS[event.status] ?? event.status}</span>
           } />
@@ -150,9 +148,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 <Link key={device.id} href={`/devices/${device.id}`} className="card flex items-center justify-between gap-3 py-2 px-3 hover:bg-foreground/5 transition-colors">
                   <div>
                     <p className="text-sm">{device.name}</p>
-                    <p className="text-xs text-muted">
+                    {device.case && <p className="text-xs text-muted">{device.case.name}</p>}
+                    <p className={`text-xs ${DEVICE_STATUS_COLORS[device.status] ?? 'text-muted'}`}>
                       {DEVICE_STATUS_LABELS[device.status] ?? device.status}
-                      {device.case && <span> &middot; {device.case.name}</span>}
                     </p>
                   </div>
                   <span className="text-muted text-xl shrink-0" aria-hidden>&#8250;</span>
@@ -168,16 +166,18 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Items ({event.items.length})</h2>
             <div className="space-y-1">
               {event.items.map(({ item, quantityNeeded }) => (
-                <div key={item.id} className="card py-2 px-3">
-                  <p className="text-sm">{item.name} <span className="text-muted">x{quantityNeeded}</span></p>
-                  {(item.comment || item.case) && (
-                    <p className="text-xs text-muted">
-                      {item.case && <span>{item.case.name}</span>}
-                      {item.case && item.comment && <span> &middot; </span>}
-                      {item.comment && <span>{item.comment}</span>}
-                    </p>
-                  )}
-                </div>
+                <Link
+                  key={item.id}
+                  href={item.case ? `/case/${item.case.id}` : `/items/${item.id}/edit`}
+                  className="card flex items-center justify-between gap-3 py-2 px-3 hover:bg-foreground/5 transition-colors"
+                >
+                  <div>
+                    <p className="text-sm">{item.name} <span className="text-muted">x{quantityNeeded}</span></p>
+                    {item.case && <p className="text-xs text-muted">{item.case.name}</p>}
+                    {item.comment && <p className="text-xs text-muted">{item.comment}</p>}
+                  </div>
+                  <span className="text-muted text-xl shrink-0" aria-hidden>&#8250;</span>
+                </Link>
               ))}
             </div>
           </section>

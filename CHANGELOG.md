@@ -4,6 +4,22 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.5.0 - 2026-05-08
+
+### Fixed
+
+- **Event detail - start time timezone**: event start time was displaying 2 hours ahead compared to the Events tab and edit page; the detail page is a server component whose `formatDateTime` function ran in the server's timezone instead of the user's browser timezone; fixed by extracting time rendering into a dedicated `EventDateTime` client component so the date is always formatted in the browser's local timezone, consistent with the Events tab
+- **Device detail - QR code URL overflow**: when a device's QR code payload is a long URL with no spaces, the detail page broke with extreme horizontal overflow; fixed by adding `break-all` to the QR code span so long unbroken strings wrap at any character boundary
+
+### Changed
+
+- **Event detail - device status colors**: device status text in the event detail view now uses the same color coding as the Inventory page: Working (green), Faulty (red), In Repair (yellow), Retired (muted), Lost (foreground), Rented (blue); previously all statuses were shown in the same muted color
+- **Event detail - device case name**: when a device belongs to a case, the case name is now shown on its own line between the device name and the status label; previously the case name was appended inline after the status with a dot separator
+- **Event detail - item case name**: when an item belongs to a case, the case name is now shown on its own line between the item name and the item comment; previously the case name and comment were combined on one line with a dot separator
+- **Event detail - items tappable**: item rows in the event detail view are now tappable links with a `>` chevron; standalone items navigate to the item's edit page, items belonging to a case navigate to the case detail page; previously item rows were non-interactive `div` elements
+
+---
+
 ## v1.4.9 - 2026-05-03
 
 ### Added

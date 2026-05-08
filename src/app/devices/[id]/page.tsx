@@ -113,7 +113,7 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
         <section className="card space-y-2 text-sm">
           <div className="flex gap-3">
             <span className="text-muted w-28 shrink-0">QR Code</span>
-            <span className="font-mono">{device.qrCode}</span>
+            <span className="font-mono break-all">{device.qrCode}</span>
           </div>
           {device.serialNumber && (
             <div className="flex gap-3">
