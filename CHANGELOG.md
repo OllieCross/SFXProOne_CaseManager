@@ -4,6 +4,14 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.5.1 - 2026-05-11
+
+### Added
+
+- **Image zoom in device and case gallery**: images opened in the lightbox viewer now support zoom and pan; on desktop, double-click toggles between 1× and 2.5× zoom, and the image can be dragged while zoomed; on mobile, pinch two fingers to zoom continuously between 1× and 5×, double-tap to toggle zoom, and drag with one finger to pan while zoomed; zoom and pan reset when navigating to a different image or closing the viewer
+
+---
+
 ## v1.5.0 - 2026-05-08
 
 ### Fixed
