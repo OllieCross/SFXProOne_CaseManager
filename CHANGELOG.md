@@ -4,6 +4,20 @@ All notable changes to SFX Pro One Inventory Manager are documented here.
 
 ---
 
+## v1.5.2 - 2026-05-11
+
+### Fixed
+
+- **Image gallery zoom - pinch focal point**: pinch-to-zoom now anchors correctly at the midpoint between two fingers instead of always zooming from the image center; fixed by computing the focal point relative to the image's layout center (subtracting current pan from the bounding rect center) and applying the correct scale-ratio formula to keep that screen point fixed as scale changes
+- **Image gallery zoom - double-tap toggle**: double-tapping no longer zooms in and immediately zooms back out; the previous implementation conflicted with iOS Safari's synthesized `click` event fired ~300ms after touchend, which triggered the desktop double-click handler and toggled zoom a second time; fixed by ignoring click events within 600ms of the last touch and resetting the tap timestamp after a double-tap fires so a rapid third tap cannot re-toggle
+- **Image gallery zoom - pan flicker**: the random black flicker during pan is eliminated by removing React state updates on every gesture frame; gesture handlers now mutate the image DOM node directly (`imgRef.current.style.transform`) and only update React state when the zoomed/unzoomed status actually changes, avoiding mid-gesture re-renders that conflicted with CSS transitions
+
+### Changed
+
+- **Image gallery - close button**: the lightbox close button is now a larger circular button (36x36px) with a frosted white background, positioned at the top-right corner of the image; previously it was a small unstyled times symbol that was easy to miss
+
+---
+
 ## v1.5.1 - 2026-05-11
 
 ### Added
