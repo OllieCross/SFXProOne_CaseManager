@@ -31,7 +31,7 @@
     "html5-qrcode": "^2.3.8",
     "ioredis": "^5.4.1",
     "marked": "^17.0.5",
-    "next": "^15.2.0",
+    "next": "^15.5.18",
     "next-auth": "^5.0.0-beta.25",
     "pdfjs-dist": "^4.6.82",
     "qrcode": "^1.5.4",
@@ -42,7 +42,10 @@
   },
   "overrides": {
     "defu": ">=6.1.5",
-    "effect": ">=3.20.0"
+    "effect": ">=3.20.0",
+    "dompurify": ">=3.4.4",
+    "fast-xml-parser": ">=5.8.0",
+    "fast-xml-builder": ">=1.2.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

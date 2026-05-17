@@ -507,7 +507,7 @@ export default function TankEditorForm({ mode, tankId, initialData }: Props) {
             {pendingImages.map((p, i) => (
               <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-foreground/10 bg-surface">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.previewUrl} alt={p.file.name} className="w-full h-full object-cover opacity-60" />
+                <img src={p.previewUrl.startsWith('blob:') ? p.previewUrl : ''} alt="preview" className="w-full h-full object-cover opacity-60" />
                 <button type="button" onClick={() => removePendingImage(i)} className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-500/80 transition-colors" aria-label="Remove">&times;</button>
               </div>
             ))}
